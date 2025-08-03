@@ -34,10 +34,16 @@ export default function PersonCard({ person, onBackToList, onBackToMap, onDelete
 
         {photoSrc && (
             <img
-                src={photoSrc}
+                src={
+                  person.photo?.startsWith('data:') || person.photo?.startsWith('blob:')
+                      ? person.photo // временное изображение из input
+                      : `${import.meta.env.BASE_URL}assets/images/${person.photo}`
+                }
                 alt={`${person.lastName} ${person.firstName}`}
                 className="person-photo"
             />
+
+
         )}
 
         <p>{person.bio}</p>

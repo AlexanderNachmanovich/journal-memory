@@ -17,15 +17,16 @@ export default function Map({ onSelect }) {
   return (
       <div className="map">
         <img
-            src="/assets/images/Kontyrnaya_karta_Evraziya.jpg"
+            src={`${import.meta.env.BASE_URL}assets/images/Kontyrnaya_karta_Evraziya.jpg`}
             alt="Карта Евразии"
             className="map-image"
         />
+
         {REGIONS.map((region) => (
             <button
                 key={region.name}
                 className="region-button"
-                style={{ top: region.top, left: region.left }}
+                style={{top: region.top, left: region.left}}
                 onClick={() => onSelect(region.name)}
             >
               {region.name}
