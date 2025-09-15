@@ -1,7 +1,8 @@
 import React from 'react';
 
 export default function PersonCard({ person, onBackToList, onBackToMap, onDelete, onEdit, isAdmin, onAdminLogout }) {
-  const photoSrc = person.photoPath ? `photos://${person.photoPath}` : null;
+  const photoSrc = person.photoPath ? `/photos/${person.photoPath}` : null;
+
 
   return (
       <div className="book-container">

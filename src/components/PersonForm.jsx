@@ -9,6 +9,7 @@ function splitFullName(full) {
   if (parts.length === 2) return { lastName: parts[0], firstName: parts[1], middleName: '' };
   return { lastName: parts[0], firstName: parts[1], middleName: parts.slice(2).join(' ') };
 }
+
 function normalizeDate(input) {
   if (!input) return '';
   if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
@@ -42,10 +43,12 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
     patched.birthDate = normalizeDate(patched.birthDate || '');
     if (patched.name && !patched.lastName && !patched.firstName && !patched.middleName) {
       const { lastName, firstName, middleName } = splitFullName(patched.name);
-      patched.lastName = lastName; patched.firstName = firstName; patched.middleName = middleName;
+      patched.lastName = lastName;
+      patched.firstName = firstName;
+      patched.middleName = middleName;
     }
     setFormData(prev => ({ ...prev, ...patched }));
-    setPreviewURL(patched.photoPath ? `photos://${patched.photoPath}` : null);
+    setPreviewURL(patched.photoPath ? `/photos/${patched.photoPath}` : null);
   }, [initialData]);
 
   const handleChange = (e) => {
@@ -74,7 +77,7 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
     }
 
     setFormData(prev => ({ ...prev, photoPath: savedFileName }));
-    setPreviewURL(`photos://${savedFileName}`);
+    setPreviewURL(`/photos/${savedFileName}`);
   };
 
   const handleSubmit = async (e) => {
@@ -107,7 +110,11 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
           <button onClick={onCancel} className="back-button">← Вернуться к списку</button>
           <button onClick={onBackToMap} className="back-button">← Выход на карту мира</button>
           {isAdmin && (
-              <button className="back-button" style={{ marginTop: 8 }} onClick={() => onAdminLogout?.()}>
+              <button
+                  className="back-button"
+                  style={{ marginTop: 8 }}
+                  onClick={() => onAdminLogout?.()}
+              >
                 ⇦ Выйти из админ-режима
               </button>
           )}
@@ -119,18 +126,53 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
             {previewURL && <img src={previewURL} alt="Фото" className="person-photo" />}
             <input type="file" accept="image/*" onChange={handlePhotoChange} />
 
-            <input type="text" name="lastName" placeholder="Фамилия" value={formData.lastName || ''} onChange={handleChange} required />
-            <input type="text" name="firstName" placeholder="Имя" value={formData.firstName || ''} onChange={handleChange} required />
-            <input type="text" name="middleName" placeholder="Отчество" value={formData.middleName || ''} onChange={handleChange} />
+            <input
+                type="text"
+                name="lastName"
+                placeholder="Фамилия"
+                value={formData.lastName || ''}
+                onChange={handleChange}
+                required
+            />
+            <input
+                type="text"
+                name="firstName"
+                placeholder="Имя"
+                value={formData.firstName || ''}
+                onChange={handleChange}
+                required
+            />
+            <input
+                type="text"
+                name="middleName"
+                placeholder="Отчество"
+                value={formData.middleName || ''}
+                onChange={handleChange}
+            />
 
-            <input type="date" name="birthDate" value={formData.birthDate || ''} onChange={handleChange} />
+            <input
+                type="date"
+                name="birthDate"
+                value={formData.birthDate || ''}
+                onChange={handleChange}
+            />
 
-            <select name="region" value={formData.region || ''} onChange={handleChange} required>
+            <select
+                name="region"
+                value={formData.region || ''}
+                onChange={handleChange}
+                required
+            >
               <option value="">Выберите регион</option>
               {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
             </select>
 
-            <textarea name="biography" placeholder="Биография" value={formData.biography || ''} onChange={handleChange} />
+            <textarea
+                name="biography"
+                placeholder="Биография"
+                value={formData.biography || ''}
+                onChange={handleChange}
+            />
 
             <div className="form-buttons">
               <button type="submit">💾 Сохранить</button>

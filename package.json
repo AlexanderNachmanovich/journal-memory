@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "main": "electron/main.js",
+  "description": "Интерактивное приложение «Журнал памяти» для музея",
+  "author": "Твое Имя <email@example.com>",
   "scripts": {
     "dev": "vite",
     "dev:electron": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
@@ -10,22 +12,20 @@
     "build": "vite build",
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "rebuild": "electron-rebuild",
     "postinstall": "electron-builder install-app-deps"
   },
   "build": {
     "appId": "org.museum.journalmemory",
     "productName": "Журнал памяти",
-    "files": [
-      "dist/**",
-      "electron/**",
-      "node_modules/**",
-      "package.json"
-    ],
     "asar": true,
     "directories": {
       "buildResources": "build"
     },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
     "mac": {
       "target": ["dmg"]
     },
@@ -44,7 +44,6 @@
     "concurrently": "^8.2.2",
     "electron": "31.0.2",
     "electron-builder": "^24.13.3",
-    "electron-rebuild": "^3.2.9",
     "vite": "5.2.10",
     "wait-on": "^7.2.0"
   }

@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import LoginModal from "./LoginModal";
 
-// импортируем через Vite, чтобы работало и при dev, и при build
-import background from "/assets/images/background.png";
-
 const REGIONS = [
   "Ангола",
   "Афганистан",
@@ -38,7 +35,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
       <div className="map">
         <img
             className="map-image"
-            src={background}   // ← теперь Vite сам подставит правильный путь
+            src="/assets/images/background.png"  // ← напрямую из public/
             alt="map"
             draggable={false}
         />
