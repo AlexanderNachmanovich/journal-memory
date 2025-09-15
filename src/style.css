@@ -1,14 +1,14 @@
 /* === Fonts: IBM Plex Mono (Regular + Bold) === */
 @font-face {
   font-family: "IBMPlexMono";
-  src: url("/assets/fonts/IBMPlexMono-Regular.ttf") format("truetype");
+  src: url("assets/fonts/IBMPlexMono-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "IBMPlexMono";
-  src: url("/assets/fonts/IBMPlexMono-Bold.ttf") format("truetype");
+  src: url("assets/fonts/IBMPlexMono-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -18,11 +18,11 @@
 :root {
   --font-ui: "IBMPlexMono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* Параметры разворота книги (подгони под свой макет при необходимости) */
-  --page-w: 36%;        /* ширина каждой страницы */
-  --seam-gap: 3.6%;     /* зазор у корешка */
-  --left-nudge: 15.2%;  /* сдвиг левой страницы влево */
-  --right-nudge: -5.8%; /* сдвиг правой страницы вправо */
+  /* Параметры разворота книги */
+  --page-w: 36%;
+  --seam-gap: 3.6%;
+  --left-nudge: 15.2%;
+  --right-nudge: -5.8%;
 }
 
 html, body {
@@ -30,7 +30,7 @@ html, body {
   font-weight: 400;
 }
 
-/* Заголовки/важные элементы — жирным */
+/* Заголовки и важные элементы */
 h1, h2, h3, b, strong,
 .region-button,
 .back-button,
@@ -48,7 +48,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;       /* убираем скролл страницы */
+  overflow: hidden;
   background: #000;
 }
 
@@ -68,7 +68,6 @@ html, body {
   overflow: hidden;
 }
 
-/* фон карты — только картинка, не перехватывает клики */
 .map-image {
   width: 100%;
   height: 100%;
@@ -78,21 +77,19 @@ html, body {
   pointer-events: none;
 }
 
-/* Панель кнопок снизу */
+/* Панель кнопок */
 .region-buttons {
   position: absolute;
   bottom: 20%;
-  left: auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
   justify-items: center;
   padding: 0 40px;
-  box-sizing: border-box;
-  z-index: 10;            /* поверх изображения */
+  z-index: 10;
 }
 
-/* Стиль кнопок «под старину» */
+/* Кнопки регионов */
 .region-button {
   background: #c19a6b;
   border: 2px solid #8b5e3c;
@@ -108,7 +105,7 @@ html, body {
 .region-button:hover { background: #d2b48c; transform: translateY(-2px); }
 .region-button:active { background: #a67c52; transform: translateY(1px); }
 
-/* Плавающая кнопка админа — всегда сверху и кликабельна */
+/* FAB администратора */
 .admin-fab {
   position: fixed;
   left: 24px;
@@ -125,29 +122,29 @@ html, body {
   justify-content: center;
   cursor: pointer;
   user-select: none;
-  z-index: 2147483647;     /* поверх всего */
+  z-index: 2147483647;
   pointer-events: auto;
   transition: transform .15s ease, background .15s ease;
 }
 .admin-fab:hover  { background:#d2b48c; transform: translateY(-2px); }
 .admin-fab:active { background:#a67c52; transform: translateY(0); }
 
-/* ==== РАЗВОРОТ КНИГИ (две колонки) ==== */
+/* ==== КНИГА ==== */
 .book-container {
   display: grid;
   grid-template-columns: var(--page-w) var(--page-w);
   column-gap: var(--seam-gap);
-  justify-content: center;                  /* центрируем разворот */
+  justify-content: center;
   align-items: center;
-  background: url("/assets/images/background2.png") center/cover no-repeat;
+  background: url("assets/images/background2.png") center/cover no-repeat;
   height: 100vh;
   width: 100%;
-  overflow: hidden;                         /* ничего не вылезает за разворот */
+  overflow: hidden;
 }
 
 .book-page {
   height: 83%;
-  padding: 2% 2.5%;                         /* внутренние поля листа */
+  padding: 2% 2.5%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -157,20 +154,19 @@ html, body {
 .left-page {
   text-align: center;
   max-width: 80%;
-  transform: translateX(var(--left-nudge)); /* подгоняем левую страницу */
+  transform: translateX(var(--left-nudge));
 }
 
 .right-page {
-  transform: translateX(var(--right-nudge));/* лёгкий сдвиг вправо */
+  transform: translateX(var(--right-nudge));
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  overflow: hidden;                         /* контент не выходит за страницу */
+  align-items: stretch;
+  overflow: hidden;
   max-width: 80%;
-  align-items: stretch;                     /* для корректной прокрутки таблицы */
 }
 
-/* Таблица на правой странице */
+/* Таблица */
 .right-page table {
   width: 100%;
   border-collapse: collapse;
@@ -193,31 +189,28 @@ html, body {
 
 .person-photo {
   width: 220px;
-  height: auto;
   margin-bottom: 20px;
   border: 3px solid #3e2f1c;
   filter: sepia(100%) contrast(90%) brightness(95%);
   box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
 }
 
-/* Биография: прокрутка внутри «листа» без видимого скроллбара */
+/* Биография */
 .biography-box {
   margin-top: 15px;
   max-height: calc(100vh - 420px);
-  overflow-y: auto;            /* прокручиваем, но прячем полосу */
-  padding-right: 0;
+  overflow-y: auto;
   text-align: left;
   line-height: 1.5;
   max-width: 90%;
   overflow-wrap: anywhere;
   word-break: break-word;
-
-  scrollbar-width: none;       /* Firefox */
-  -ms-overflow-style: none;    /* IE/старый Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.biography-box::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.biography-box::-webkit-scrollbar { display: none; }
 
-/* ==== ФОРМА ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ ==== */
+/* ==== ФОРМА ==== */
 .person-form {
   display: flex;
   flex-direction: column;
@@ -232,17 +225,7 @@ html, body {
   border-radius: 4px;
   background: #f5f0e6;
 }
-.person-form input[type="date"] {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #8b5e3c;
-  border-radius: 4px;
-  background: #f5f0e6;
-}
-.person-form textarea {
-  min-height: 100px;
-  resize: vertical;
-}
+.person-form textarea { min-height: 100px; resize: vertical; }
 
 .form-buttons {
   display: flex;
@@ -262,7 +245,7 @@ html, body {
 }
 .form-buttons button:hover { background: #d2b48c; }
 
-/* ==== КНОПКИ СЛЕВА (как кнопки регионов) ==== */
+/* ==== КНОПКИ СЛЕВА ==== */
 .back-button,
 .edit-button,
 .delete-button {
@@ -276,7 +259,6 @@ html, body {
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
-
   display: block;
   width: min(420px, 80%);
   margin: 8px auto 0;
@@ -284,39 +266,29 @@ html, body {
 }
 .back-button:hover,
 .edit-button:hover,
-.delete-button:hover {
-  background: #d2b48c;
-  transform: translateY(-2px);
-}
+.delete-button:hover { background: #d2b48c; transform: translateY(-2px); }
 .back-button:active,
 .edit-button:active,
-.delete-button:active {
-  background: #a67c52;
-  transform: translateY(1px);
-}
+.delete-button:active { background: #a67c52; transform: translateY(1px); }
 
-/* ==== Таблица списка людей ==== */
+/* ==== СПИСОК ЛЮДЕЙ ==== */
 .people-table tbody tr {
   cursor: pointer;
   transition: background 0.15s ease-in-out;
 }
-.people-table tbody tr:hover {
-  background: rgba(0, 0, 0, 0.06);
-}
+.people-table tbody tr:hover { background: rgba(0, 0, 0, 0.06); }
 
-/* Прокрутка таблицы на правой странице без видимого скроллбара */
 .people-scroll {
-  flex: 1;                 /* занять всё оставшееся место под заголовком */
-  min-height: 0;           /* важно для overflow внутри flex-контейнера */
+  flex: 1;
+  min-height: 0;
   width: 100%;
   overflow-y: auto;
-
-  scrollbar-width: none;   /* Firefox */
+  scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.people-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+.people-scroll::-webkit-scrollbar { display: none; }
 
-/* ==== Модалка логина (если вынесешь из инлайна) ==== */
+/* ==== МОДАЛКА ==== */
 .login-backdrop {
   position: fixed;
   inset: 0;
