@@ -4,7 +4,7 @@
   "private": true,
   "main": "electron/main.js",
   "description": "Интерактивное приложение «Журнал памяти» для музея",
-  "author": "Твое Имя <email@example.com>",
+  "author": "Александр Нахманович <a.nachmanovich@gmail.com>",
   "scripts": {
     "dev": "vite",
     "dev:electron": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
@@ -27,7 +27,9 @@
       "package.json"
     ],
     "mac": {
-      "target": ["dmg"]
+      "target": ["dmg"],
+      "arch": ["universal"],
+      "artifactName": "JournalMemory-${version}-mac-universal.${ext}"
     },
     "win": {
       "target": ["nsis"],
