@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import LoginModal from "./LoginModal";
 
-// ✅ импортируем фон как модуль, Vite сам подставит правильный путь
-import bgImage from "/assets/images/background.png";
+// импортируем через Vite, чтобы работало и при dev, и при build
+import background from "/assets/images/background.png";
 
 const REGIONS = [
   "Ангола",
@@ -38,7 +38,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
       <div className="map">
         <img
             className="map-image"
-            src={bgImage}  // ✅ теперь путь всегда правильный
+            src={background}   // ← теперь Vite сам подставит правильный путь
             alt="map"
             draggable={false}
         />
@@ -56,7 +56,6 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
           ))}
         </div>
 
-        {/* Флотирующая кнопка администратора */}
         {!isAdmin ? (
             <button
                 type="button"
@@ -87,11 +86,13 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
             </button>
         )}
 
-        <LoginModal
-            open={loginOpen}
-            onClose={() => setLoginOpen(false)}
-            onSubmit={doLogin}
-        />
+        {loginOpen && (
+            <LoginModal
+                open={loginOpen}
+                onClose={() => setLoginOpen(false)}
+                onSubmit={doLogin}
+            />
+        )}
       </div>
   );
 }
