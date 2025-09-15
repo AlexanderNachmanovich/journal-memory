@@ -1,140 +1,143 @@
 import React, { useState, useEffect } from 'react';
+import { REGIONS } from "../data/regions";
 
-const REGIONS = [
-  'Север', 'Юг', 'Запад', 'Восток', 'Центр',
-  'Северо-Запад', 'Северо-Восток', 'Юго-Запад', 'Юго-Восток'
-];
+// helpers
+function splitFullName(full) {
+  if (!full || typeof full !== 'string') return { lastName: '', firstName: '', middleName: '' };
+  const parts = full.replace(/\s+/g, ' ').trim().split(' ');
+  if (parts.length === 1) return { lastName: parts[0], firstName: '', middleName: '' };
+  if (parts.length === 2) return { lastName: parts[0], firstName: parts[1], middleName: '' };
+  return { lastName: parts[0], firstName: parts[1], middleName: parts.slice(2).join(' ') };
+}
+function normalizeDate(input) {
+  if (!input) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(input)) {
+    const [d, m, y] = input.split('.');
+    return `${y}-${m}-${d}`;
+  }
+  return input;
+}
 
-export default function PersonForm({ initialData = {}, onSave, onCancel }) {
+export default function PersonForm({ initialData = {}, onSave, onCancel, onBackToMap, isAdmin, onAdminLogout }) {
   const [formData, setFormData] = useState({
+    id: null,
     firstName: '',
     lastName: '',
     middleName: '',
+    birthDate: '',
     region: '',
-    photo: '',
-    bio: '',
-    conflict: ''
+    photoPath: '',
+    biography: ''
   });
-  const [photoFile, setPhotoFile] = useState(null);
   const [previewURL, setPreviewURL] = useState(null);
 
   useEffect(() => {
-    if (initialData) {
-      setFormData((prev) => ({ ...prev, ...initialData }));
-      if (initialData.photoURL) {
-        setPreviewURL(initialData.photoURL);
-      } else if (initialData.photo) {
-        setPreviewURL(`/assets/images/${initialData.photo}`);
-      }
+    if (!initialData) return;
+    const patched = { ...initialData };
+    if (!patched.birthDate && patched.birthYear) {
+      const y = String(patched.birthYear).padStart(4, '0');
+      patched.birthDate = `${y}-01-01`;
     }
+    patched.birthDate = normalizeDate(patched.birthDate || '');
+    if (patched.name && !patched.lastName && !patched.firstName && !patched.middleName) {
+      const { lastName, firstName, middleName } = splitFullName(patched.name);
+      patched.lastName = lastName; patched.firstName = firstName; patched.middleName = middleName;
+    }
+    setFormData(prev => ({ ...prev, ...patched }));
+    setPreviewURL(patched.photoPath ? `photos://${patched.photoPath}` : null);
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPhotoFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewURL(url);
-      setFormData((prev) => ({
-        ...prev,
-        photo: file.name
-      }));
+  const handlePhotoChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const uniqueName = `${Date.now()}-${file.name}`;
+    let savedFileName;
+
+    if (formData.photoPath) {
+      savedFileName = await window.api.replacePhoto({
+        tempPath: file.path,
+        fileName: uniqueName,
+        oldFileName: formData.photoPath,
+      });
+    } else {
+      savedFileName = await window.api.savePhoto({
+        tempPath: file.path,
+        fileName: uniqueName,
+      });
     }
+
+    setFormData(prev => ({ ...prev, photoPath: savedFileName }));
+    setPreviewURL(`photos://${savedFileName}`);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const updatedData = {
-      ...formData
+    const personData = {
+      id: formData.id,
+      name: `${formData.lastName} ${formData.firstName} ${formData.middleName}`.replace(/\s+/g, ' ').trim(),
+      birthDate: normalizeDate(formData.birthDate) || null,
+      region: formData.region,
+      biography: formData.biography,
+      photoPath: formData.photoPath
     };
-
-    if (photoFile) {
-      updatedData.photoURL = previewURL;
+    try {
+      if (formData.id) {
+        await window.api.updatePerson(personData);
+      } else {
+        await window.api.addPerson(personData);
+      }
+      onSave && onSave();
+    } catch (err) {
+      console.error("Ошибка сохранения:", err);
     }
-
-    onSave(updatedData);
   };
 
   return (
-      <form className="person-form" onSubmit={handleSubmit}>
-        <h2>{initialData.id ? 'Редактировать' : 'Добавить'} человека</h2>
-
-        <input
-            type="text"
-            name="lastName"
-            placeholder="Фамилия"
-            value={formData.lastName}
-            onChange={handleChange}
-            required
-        />
-
-        <input
-            type="text"
-            name="firstName"
-            placeholder="Имя"
-            value={formData.firstName}
-            onChange={handleChange}
-            required
-        />
-
-        <input
-            type="text"
-            name="middleName"
-            placeholder="Отчество"
-            value={formData.middleName}
-            onChange={handleChange}
-        />
-
-        <select
-            name="region"
-            value={formData.region}
-            onChange={handleChange}
-            required
-        >
-          <option value="">Выберите регион</option>
-          {REGIONS.map((region) => (
-              <option key={region} value={region}>{region}</option>
-          ))}
-        </select>
-
-        <input
-            type="file"
-            accept="image/*"
-            onChange={handlePhotoChange}
-        />
-
-        {previewURL && (
-            <img
-                src={previewURL}
-                alt="Предпросмотр"
-                style={{ maxWidth: '200px', marginTop: '10px' }}
-            />
-        )}
-
-        <textarea
-            name="bio"
-            placeholder="Биография"
-            value={formData.bio}
-            onChange={handleChange}
-        />
-
-        <input
-            type="text"
-            name="conflict"
-            placeholder="Участие в конфликте"
-            value={formData.conflict}
-            onChange={handleChange}
-        />
-
-        <div className="form-buttons">
-          <button type="submit">Сохранить</button>
-          <button type="button" onClick={onCancel}>Отмена</button>
+      <div className="book-container">
+        {/* Левая страница */}
+        <div className="book-page left-page">
+          <h1>КНИГА ПАМЯТИ</h1>
+          <button onClick={onCancel} className="back-button">← Вернуться к списку</button>
+          <button onClick={onBackToMap} className="back-button">← Выход на карту мира</button>
+          {isAdmin && (
+              <button className="back-button" style={{ marginTop: 8 }} onClick={() => onAdminLogout?.()}>
+                ⇦ Выйти из админ-режима
+              </button>
+          )}
         </div>
-      </form>
+
+        {/* Правая страница */}
+        <div className="book-page right-page">
+          <form className="person-form" onSubmit={handleSubmit}>
+            {previewURL && <img src={previewURL} alt="Фото" className="person-photo" />}
+            <input type="file" accept="image/*" onChange={handlePhotoChange} />
+
+            <input type="text" name="lastName" placeholder="Фамилия" value={formData.lastName || ''} onChange={handleChange} required />
+            <input type="text" name="firstName" placeholder="Имя" value={formData.firstName || ''} onChange={handleChange} required />
+            <input type="text" name="middleName" placeholder="Отчество" value={formData.middleName || ''} onChange={handleChange} />
+
+            <input type="date" name="birthDate" value={formData.birthDate || ''} onChange={handleChange} />
+
+            <select name="region" value={formData.region || ''} onChange={handleChange} required>
+              <option value="">Выберите регион</option>
+              {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+            </select>
+
+            <textarea name="biography" placeholder="Биография" value={formData.biography || ''} onChange={handleChange} />
+
+            <div className="form-buttons">
+              <button type="submit">💾 Сохранить</button>
+              <button type="button" onClick={onCancel}>✖ Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
   );
 }

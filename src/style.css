@@ -1,97 +1,373 @@
-body {
-  font-family: sans-serif;
+/* === Fonts: IBM Plex Mono (Regular + Bold) === */
+@font-face {
+  font-family: "IBMPlexMono";
+  src: url("/assets/fonts/IBMPlexMono-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "IBMPlexMono";
+  src: url("/assets/fonts/IBMPlexMono-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Глобально используем новый шрифт + параметры разворота */
+:root {
+  --font-ui: "IBMPlexMono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Параметры разворота книги (подгони под свой макет при необходимости) */
+  --page-w: 36%;        /* ширина каждой страницы */
+  --seam-gap: 3.6%;     /* зазор у корешка */
+  --left-nudge: 15.2%;  /* сдвиг левой страницы влево */
+  --right-nudge: -5.8%; /* сдвиг правой страницы вправо */
+}
+
+html, body {
+  font-family: var(--font-ui);
+  font-weight: 400;
+}
+
+/* Заголовки/важные элементы — жирным */
+h1, h2, h3, b, strong,
+.region-button,
+.back-button,
+.edit-button,
+.delete-button,
+.right-page th {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ==== БАЗОВОЕ ==== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
   margin: 0;
-  padding: 20px;
-  background: #f4f4f4;
-  color: #222;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;       /* убираем скролл страницы */
+  background: #000;
 }
 
 .app {
-  max-width: 800px;
-  margin: 0 auto;
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100%;
 }
 
-.map-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
-}
-
-button {
-  padding: 8px 12px;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background-color: #ddd;
-}
-
-button:hover {
-  background-color: #bbb;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-}
-
-.person-photo {
-  max-width: 100%;
-  margin: 10px 0;
-  border-radius: 8px;
-}
-
+/* ==== КАРТА ==== */
 .map {
   position: relative;
   width: 100%;
-  max-width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   overflow: hidden;
 }
 
+/* фон карты — только картинка, не перехватывает клики */
 .map-image {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   display: block;
+  pointer-events: none;
 }
 
-.region-button {
+/* Панель кнопок снизу */
+.region-buttons {
   position: absolute;
-  transform: translate(-50%, -50%);
-  padding: 6px 12px;
-  font-size: 14px;
-  background-color: rgba(0, 0, 255, 0.7);
-  color: white;
-  border: none;
-  border-radius: 6px;
+  bottom: 20%;
+  left: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  justify-items: center;
+  padding: 0 40px;
+  box-sizing: border-box;
+  z-index: 10;            /* поверх изображения */
+}
+
+/* Стиль кнопок «под старину» */
+.region-button {
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2e1b0e;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
 }
+.region-button:hover { background: #d2b48c; transform: translateY(-2px); }
+.region-button:active { background: #a67c52; transform: translateY(1px); }
 
-.region-button:hover {
-  background-color: rgba(0, 0, 180, 0.9);
-}
-
-.back-button {
-  margin: 1rem 0;
-  padding: 6px 12px;
-  background-color: #ddd;
-  border: none;
-  border-radius: 4px;
+/* Плавающая кнопка админа — всегда сверху и кликабельна */
+.admin-fab {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.45);
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  user-select: none;
+  z-index: 2147483647;     /* поверх всего */
+  pointer-events: auto;
+  transition: transform .15s ease, background .15s ease;
+}
+.admin-fab:hover  { background:#d2b48c; transform: translateY(-2px); }
+.admin-fab:active { background:#a67c52; transform: translateY(0); }
+
+/* ==== РАЗВОРОТ КНИГИ (две колонки) ==== */
+.book-container {
+  display: grid;
+  grid-template-columns: var(--page-w) var(--page-w);
+  column-gap: var(--seam-gap);
+  justify-content: center;                  /* центрируем разворот */
+  align-items: center;
+  background: url("/assets/images/background2.png") center/cover no-repeat;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;                         /* ничего не вылезает за разворот */
 }
 
-.back-button:hover {
-  background-color: #ccc;
-}
-
-.button-group {
+.book-page {
+  height: 83%;
+  padding: 2% 2.5%;                         /* внутренние поля листа */
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  justify-content: center;
+  position: relative;
+}
+
+.left-page {
+  text-align: center;
+  max-width: 80%;
+  transform: translateX(var(--left-nudge)); /* подгоняем левую страницу */
+}
+
+.right-page {
+  transform: translateX(var(--right-nudge));/* лёгкий сдвиг вправо */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;                         /* контент не выходит за страницу */
+  max-width: 80%;
+  align-items: stretch;                     /* для корректной прокрутки таблицы */
+}
+
+/* Таблица на правой странице */
+.right-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.right-page th,
+.right-page td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+/* ==== ДЕТАЛЬ ЧЕЛОВЕКА ==== */
+.person-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: hidden;
+}
+.person-details > * { max-width: 100%; }
+
+.person-photo {
+  width: 220px;
+  height: auto;
   margin-bottom: 20px;
+  border: 3px solid #3e2f1c;
+  filter: sepia(100%) contrast(90%) brightness(95%);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+}
+
+/* Биография: прокрутка внутри «листа» без видимого скроллбара */
+.biography-box {
+  margin-top: 15px;
+  max-height: calc(100vh - 420px);
+  overflow-y: auto;            /* прокручиваем, но прячем полосу */
+  padding-right: 0;
+  text-align: left;
+  line-height: 1.5;
+  max-width: 90%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+
+  scrollbar-width: none;       /* Firefox */
+  -ms-overflow-style: none;    /* IE/старый Edge */
+}
+.biography-box::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ==== ФОРМА ДОБАВЛЕНИЯ/РЕДАКТИРОВАНИЯ ==== */
+.person-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.person-form input,
+.person-form select,
+.person-form textarea {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #8b5e3c;
+  border-radius: 4px;
+  background: #f5f0e6;
+}
+.person-form input[type="date"] {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #8b5e3c;
+  border-radius: 4px;
+  background: #f5f0e6;
+}
+.person-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.form-buttons button {
+  padding: 8px 16px;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid #8b5e3c;
+  border-radius: 6px;
+  background: #c19a6b;
+  color: #2e1b0e;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  transition: all 0.2s;
+}
+.form-buttons button:hover { background: #d2b48c; }
+
+/* ==== КНОПКИ СЛЕВА (как кнопки регионов) ==== */
+.back-button,
+.edit-button,
+.delete-button {
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #2e1b0e;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+
+  display: block;
+  width: min(420px, 80%);
+  margin: 8px auto 0;
+  text-align: center;
+}
+.back-button:hover,
+.edit-button:hover,
+.delete-button:hover {
+  background: #d2b48c;
+  transform: translateY(-2px);
+}
+.back-button:active,
+.edit-button:active,
+.delete-button:active {
+  background: #a67c52;
+  transform: translateY(1px);
+}
+
+/* ==== Таблица списка людей ==== */
+.people-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+.people-table tbody tr:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* Прокрутка таблицы на правой странице без видимого скроллбара */
+.people-scroll {
+  flex: 1;                 /* занять всё оставшееся место под заголовком */
+  min-height: 0;           /* важно для overflow внутри flex-контейнера */
+  width: 100%;
+  overflow-y: auto;
+
+  scrollbar-width: none;   /* Firefox */
+  -ms-overflow-style: none;
+}
+.people-scroll::-webkit-scrollbar { width: 0; height: 0; display: none; }
+
+/* ==== Модалка логина (если вынесешь из инлайна) ==== */
+.login-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.login-card {
+  width: min(480px, 92vw);
+  background: #f0e6d2;
+  border: 2px solid #8b5e3c;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+  padding: 24px;
+  color: #2e1b0e;
+  font-family: var(--font-ui);
+}
+.login-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  justify-content: flex-end;
+}
+.login-btn {
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2e1b0e;
+  cursor: pointer;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.35);
+}
+.login-btn-ghost { background: #e8dcc7; }
+.login-input {
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #8b5e3c;
+  border-radius: 8px;
+  background: #f5f0e6;
+  outline: none;
+}
+.login-eye-btn {
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 700;
+  color: #2e1b0e;
 }

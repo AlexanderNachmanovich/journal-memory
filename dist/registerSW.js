@@ -1,1 +1,0 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/journal-memory/sw.js', { scope: '/journal-memory/' })})}

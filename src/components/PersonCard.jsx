@@ -1,56 +1,40 @@
 import React from 'react';
 
-export default function PersonCard({ person, onBackToList, onBackToMap, onDelete, onEdit }) {
-  // Определяем источник фото: сначала photoURL (загруженное), потом photo (имя файла)
-  const photoSrc = person.photoURL || (person.photo ? `/assets/images/${person.photo}` : null);
+export default function PersonCard({ person, onBackToList, onBackToMap, onDelete, onEdit, isAdmin, onAdminLogout }) {
+  const photoSrc = person.photoPath ? `photos://${person.photoPath}` : null;
 
   return (
-      <div className="person-card">
-        <div
-            className="button-group"
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              gap: '10px',
-              marginBottom: '20px'
-            }}
-        >
+      <div className="book-container">
+        {/* Левая страница */}
+        <div className="book-page left-page">
+          <h1>КНИГА ПАМЯТИ</h1>
+
           <button className="back-button" onClick={onBackToList}>
             ← Вернуться к списку
           </button>
           <button className="back-button" onClick={onBackToMap}>
-            ← Вернуться к карте
+            ← Выход на карту мира
           </button>
-          <button className="edit-button" onClick={onEdit}>
-            ✏️ Редактировать
-          </button>
-          <button className="delete-button" onClick={onDelete}>
-            🗑 Удалить
-          </button>
+
+          {isAdmin && (
+              <>
+                <button className="edit-button" onClick={onEdit}>✏️ Редактировать</button>
+                <button className="delete-button" onClick={onDelete}>🗑 Удалить</button>
+                <button className="back-button" style={{ marginTop: 8 }} onClick={() => onAdminLogout?.()}>
+                  ⇦ Выйти из админ-режима
+                </button>
+              </>
+          )}
         </div>
 
-        <h2>{person.lastName} {person.firstName} {person.middleName}</h2>
-
-        {photoSrc && (
-            <img
-                src={
-                  person.photo?.startsWith('data:') || person.photo?.startsWith('blob:')
-                      ? person.photo // временное изображение из input
-                      : `${import.meta.env.BASE_URL}assets/images/${person.photo}`
-                }
-                alt={`${person.lastName} ${person.firstName}`}
-                className="person-photo"
-            />
-
-
-        )}
-
-        <p>{person.bio}</p>
-
-        {person.conflict && (
-            <p><strong>Участие в конфликте:</strong> {person.conflict}</p>
-        )}
+        {/* Правая страница */}
+        <div className="book-page right-page person-details">
+          {photoSrc && <img src={photoSrc} alt={person.name} className="person-photo" />}
+          <h2 style={{ marginBottom: 8 }}>{person.name}</h2>
+          {person.birthDate && <div style={{ marginBottom: 8 }}>Дата рождения: {person.birthDate.split('-').reverse().join('.')}</div>}
+          {person.region && <div style={{ marginBottom: 8 }}>Регион: {person.region}</div>}
+          {person.biography && <div className="biography-box">{person.biography}</div>}
+        </div>
       </div>
   );
 }

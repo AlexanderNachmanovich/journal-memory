@@ -2,22 +2,52 @@
   "name": "journal-memory",
   "version": "1.0.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
+    "dev:electron": "concurrently -k \"vite\" \"wait-on tcp:5173 && electron .\"",
+    "dev:electron:simple": "concurrently \"vite\" \"sleep 3 && electron .\"",
     "build": "vite build",
-    "preview": "vite preview",
-    "predeploy": "vite build",
-    "deploy": "gh-pages -d dist"
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
 
+  "build": {
+    "appId": "org.museum.journalmemory",
+    "productName": "Журнал памяти",
+    "files": [
+      "dist/**",
+      "electron/**",
+      "node_modules/**",
+      "package.json"
+    ],
+    "asar": true,
+    "directories": {
+      "buildResources": "build"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "artifactName": "JournalMemory-${version}-Setup.${ext}"
+    }
   },
   "dependencies": {
+    "better-sqlite3": "^12.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "3.1.0",
-    "gh-pages": "^6.3.0",
+    "@vitejs/plugin-react": "4.2.1",
+    "concurrently": "^8.2.2",
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3",
     "vite": "5.2.10",
-    "vite-plugin-pwa": "0.16.4"
+    "wait-on": "^7.2.0"
   }
 }

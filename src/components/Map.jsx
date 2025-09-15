@@ -1,37 +1,97 @@
-import React from "react";
-import "../style.css";
+import React, { useState } from "react";
+import LoginModal from "./LoginModal";
+
+// ✅ импортируем фон как модуль, Vite сам подставит правильный путь
+import bgImage from "/assets/images/background.png";
 
 const REGIONS = [
-  { name: "Север", top: "10%", left: "50%" },
-  { name: "Юг", top: "75%", left: "50%" },
-  { name: "Запад", top: "45%", left: "20%" },
-  { name: "Восток", top: "45%", left: "80%" },
-  { name: "Центр", top: "45%", left: "50%" },
-  { name: "Северо-Запад", top: "20%", left: "30%" },
-  { name: "Северо-Восток", top: "20%", left: "70%" },
-  { name: "Юго-Запад", top: "70%", left: "30%" },
-  { name: "Юго-Восток", top: "70%", left: "70%" },
+  "Ангола",
+  "Афганистан",
+  "Нагорный Карабах",
+  "Сирия",
+  "Таджикистан",
+  "Чечня",
+  "Эфиопия",
+  "Зона СВО",
 ];
 
-export default function Map({ onSelect }) {
+export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) {
+  const [loginOpen, setLoginOpen] = useState(false);
+
+  const doLogin = async (pwd) => {
+    const res = await onAdminLogin?.(pwd);
+    if (res?.ok) setLoginOpen(false);
+    return res;
+  };
+
+  const openLogin = (e) => {
+    e.stopPropagation();
+    setLoginOpen(true);
+  };
+
+  const logout = (e) => {
+    e.stopPropagation();
+    onAdminLogout?.();
+  };
+
   return (
       <div className="map">
         <img
-            src={`${import.meta.env.BASE_URL}assets/images/Kontyrnaya_karta_Evraziya.jpg`}
-            alt="Карта Евразии"
             className="map-image"
+            src={bgImage}  // ✅ теперь путь всегда правильный
+            alt="map"
+            draggable={false}
         />
 
-        {REGIONS.map((region) => (
+        <div className="region-buttons">
+          {REGIONS.map((r) => (
+              <button
+                  key={r}
+                  className="region-button"
+                  onClick={() => onSelect(r)}
+                  type="button"
+              >
+                {r}
+              </button>
+          ))}
+        </div>
+
+        {/* Флотирующая кнопка администратора */}
+        {!isAdmin ? (
             <button
-                key={region.name}
-                className="region-button"
-                style={{top: region.top, left: region.left}}
-                onClick={() => onSelect(region.name)}
+                type="button"
+                className="admin-fab"
+                title="Режим администратора"
+                onClick={openLogin}
+                onMouseDown={openLogin}
+                style={{
+                  zIndex: 2147483647,
+                  pointerEvents: "auto",
+                }}
             >
-              {region.name}
+              🔐
             </button>
-        ))}
+        ) : (
+            <button
+                type="button"
+                className="admin-fab"
+                title="Выйти из админ-режима"
+                onClick={logout}
+                onMouseDown={logout}
+                style={{
+                  zIndex: 2147483647,
+                  pointerEvents: "auto",
+                }}
+            >
+              🚪
+            </button>
+        )}
+
+        <LoginModal
+            open={loginOpen}
+            onClose={() => setLoginOpen(false)}
+            onSubmit={doLogin}
+        />
       </div>
   );
 }

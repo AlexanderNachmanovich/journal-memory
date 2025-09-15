@@ -3,79 +3,103 @@ import Map from "./components/Map";
 import PeopleList from "./components/PeopleList";
 import PersonCard from "./components/PersonCard";
 import PersonForm from "./components/PersonForm";
+import RegionPeopleList from "./components/RegionPeopleList";
 import { useData } from "./data/useData";
+import { useAuth } from "./data/useAuth";
 
 export default function App() {
-  const { data, setData, loading } = useData();
-  const [selectedRegion, setSelectedRegion] = useState(null);
+  const { data: people, loading, reload } = useData();
+  const { isAdmin, login, logout } = useAuth();
+
+  // UI state
+  const [selectedRegion, setSelectedRegion] = useState(null); // null | "Имя региона" | "__ALL__"
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingPerson, setEditingPerson] = useState(null);
 
-  if (loading) return <p>Загрузка...</p>;
-
-  const people = selectedRegion
-      ? data.filter((p) => p.region === selectedRegion)
-      : [];
-
-  const handleSavePerson = (personData) => {
-    if (editingPerson) {
-      // Редактирование
-      const updatedPerson = { ...editingPerson, ...personData };
-      setData((prev) =>
-          prev.map((p) => (p.id === editingPerson.id ? updatedPerson : p))
-      );
-    } else {
-      // Добавление
-      const newPerson = {
-        id: Date.now().toString(),
-        ...personData,
-        region: selectedRegion,
-      };
-      setData((prev) => [...prev, newPerson]);
-    }
-
+  const handleSavePerson = async () => {
+    await reload();
     setIsAdding(false);
     setEditingPerson(null);
   };
 
-  const handleDeletePerson = (id) => {
+  const handleDeletePerson = async (id) => {
     if (window.confirm("Удалить этого человека?")) {
-      setData((prev) => prev.filter((p) => p.id !== id));
-      setSelectedPerson(null);
+      try {
+        await window.api.deletePerson(id);
+        await reload();
+        setSelectedPerson(null);
+      } catch {
+        alert("Операция не разрешена. Войдите как администратор.");
+      }
     }
   };
 
+  if (loading) return <p>Загрузка...</p>;
+
   return (
       <div className="app">
-        <h1>Журнал памяти</h1>
-
+        {/* --- Главная: карта --- */}
         {!selectedRegion && !selectedPerson && !isAdding && (
-            <Map onSelect={setSelectedRegion} />
+            <Map
+                onSelect={setSelectedRegion}
+                isAdmin={isAdmin}
+                onAdminLogin={login}
+                onAdminLogout={logout}
+            />
         )}
 
-        {selectedRegion && !selectedPerson && !isAdding && (
-            <>
-              <button onClick={() => setIsAdding(true)}>➕ Добавить человека</button>
-              <PeopleList
-                  people={people}
-                  onSelect={setSelectedPerson}
-                  onBack={() => setSelectedRegion(null)}
-              />
-            </>
+        {/* --- Список людей выбранного региона (разворот книги) --- */}
+        {selectedRegion && selectedRegion !== "__ALL__" && !selectedPerson && !isAdding && (
+            <RegionPeopleList
+                region={selectedRegion}
+                people={people}
+                onSelect={setSelectedPerson}
+                onBackToMap={() => setSelectedRegion(null)}
+                onShowAll={() => setSelectedRegion("__ALL__")}
+                onAdd={isAdmin ? () => { setIsAdding(true); setEditingPerson(null); } : undefined}
+                isAdmin={isAdmin}
+                onAdminLogout={logout}
+            />
         )}
 
+        {/* --- Общий список (разворот книги) --- */}
+        {selectedRegion === "__ALL__" && !selectedPerson && !isAdding && (
+            <PeopleList
+                people={people}
+                onSelect={setSelectedPerson}
+                onBack={() => setSelectedRegion(null)}
+                onAdd={isAdmin ? () => { setIsAdding(true); setEditingPerson(null); } : undefined}
+                isAdmin={isAdmin}
+                onAdminLogout={logout}
+            />
+        )}
+
+        {/* --- Форма добавления/редактирования (разворот книги) --- */}
         {isAdding && (
             <PersonForm
-                initialData={editingPerson || { region: selectedRegion }}
+                initialData={
+                    editingPerson || {
+                      region: selectedRegion && selectedRegion !== "__ALL__" ? selectedRegion : ""
+                    }
+                }
                 onSave={handleSavePerson}
                 onCancel={() => {
                   setIsAdding(false);
                   setEditingPerson(null);
                 }}
+                onBackToMap={() => {
+                  setIsAdding(false);
+                  setEditingPerson(null);
+                  setSelectedPerson(null);
+                  setSelectedRegion(null);
+                }}
+                isAdmin={isAdmin}
+                onAdminLogout={logout}
             />
         )}
 
+        {/* --- Карточка человека (разворот книги) --- */}
         {selectedPerson && !isAdding && (
             <PersonCard
                 person={selectedPerson}
@@ -86,10 +110,16 @@ export default function App() {
                 }}
                 onDelete={() => handleDeletePerson(selectedPerson.id)}
                 onEdit={() => {
+                  if (!isAdmin) {
+                    alert("Только администратор может редактировать.");
+                    return;
+                  }
                   setEditingPerson(selectedPerson);
                   setSelectedPerson(null);
                   setIsAdding(true);
                 }}
+                isAdmin={isAdmin}
+                onAdminLogout={logout}
             />
         )}
       </div>
