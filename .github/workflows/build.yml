@@ -22,12 +22,9 @@ jobs:
         with:
           node-version: 20
 
-      # Чистая установка по package-lock.json (быстрее и стабильнее, чем npm install)
+      # Чистая установка зависимостей (по lock-файлу)
       - name: Install dependencies
         run: npm ci
-
-      - name: Rebuild native modules for Electron
-        run: npm run rebuild
 
       - name: Build renderer
         run: npm run build
