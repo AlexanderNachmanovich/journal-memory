@@ -24,13 +24,19 @@
     "files": [
       "dist/**",
       "electron/**",
-      "package.json"
+      "package.json",
+      "public/assets/**"
     ],
     "mac": {
-      "target": ["dmg"],
-      "arch": ["universal"],
-      "artifactName": "JournalMemory-${version}-mac-universal.${ext}"
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "artifactName": "JournalMemory-${version}-mac-${arch}.${ext}"
     },
+
     "win": {
       "target": ["nsis"],
       "artifactName": "JournalMemory-${version}-Setup.${ext}"
