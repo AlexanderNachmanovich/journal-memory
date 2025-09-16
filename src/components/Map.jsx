@@ -35,7 +35,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
       <div className="map">
         <img
             className="map-image"
-            src="/assets/images/background.png"  // ← напрямую из public/
+            src="./images/background.png"  // ← напрямую из public/
             alt="map"
             draggable={false}
         />

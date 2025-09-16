@@ -59,7 +59,7 @@ export default function RegionPeopleList({
               <tr>
                 <th>ФИО</th>
                 <th>Год рождения</th>
-                <th></th>
+                {/*<th></th>*/}
               </tr>
               </thead>
               <tbody>
@@ -74,7 +74,7 @@ export default function RegionPeopleList({
                       <tr key={p.id} onClick={() => onSelect && onSelect(p)}>
                         <td>{p.name}</td>
                         <td>{birthYear(p.birthDate)}</td>
-                        <td></td>
+                        {/*<td></td>*/}
                       </tr>
                   ))
               )}

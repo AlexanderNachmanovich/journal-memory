@@ -77,7 +77,7 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
     }
 
     setFormData(prev => ({ ...prev, photoPath: savedFileName }));
-    setPreviewURL(`/photos/${savedFileName}`);
+    setPreviewURL(`photos://${savedFileName}`);
   };
 
   const handleSubmit = async (e) => {
