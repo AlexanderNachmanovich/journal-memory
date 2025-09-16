@@ -1,27 +1,29 @@
 import React, { useMemo } from "react";
+import bg2 from "../assets/images/background2.png";   // <-- через Vite import
 
-/** Достаём год из YYYY-MM-DD безопасно */
 function birthYear(dateStr) {
   if (!dateStr) return "";
   const m = /^(\d{4})/.exec(String(dateStr));
   return m ? m[1] : "";
 }
 
-export default function PeopleList({
-                                     people = [],
-                                     onSelect,
-                                     onBack,
-                                     onAdd,            // () => void | undefined
-                                     isAdmin = false,
-                                     onAdminLogout,    // () => Promise<void>
-                                   }) {
+export default function PeopleList({ people = [], onSelect, onBack, onAdd, isAdmin = false, onAdminLogout }) {
   const sorted = useMemo(
       () => [...people].sort((a, b) => (a.name || "").localeCompare(b.name || "", "ru")),
       [people]
   );
 
   return (
-      <div className="book-container">
+      <div
+          className="book-container"
+          style={{
+            backgroundImage: `url(${bg2})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundColor: "#000",
+          }}
+      >
         {/* Левая страница */}
         <div className="book-page left-page">
           <h1>КНИГА ПАМЯТИ</h1>
@@ -54,7 +56,6 @@ export default function PeopleList({
               <tr>
                 <th>ФИО</th>
                 <th>Год рождения</th>
-                {/*<th></th>*/}
               </tr>
               </thead>
               <tbody>
@@ -69,7 +70,6 @@ export default function PeopleList({
                       <tr key={p.id} onClick={() => onSelect && onSelect(p)}>
                         <td>{p.name}</td>
                         <td>{birthYear(p.birthDate)}</td>
-                        {/*<td></td>*/}
                       </tr>
                   ))
               )}

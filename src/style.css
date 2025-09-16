@@ -123,8 +123,8 @@ html, body {
   column-gap: var(--seam-gap);
   justify-content: center;
   align-items: center;
-
-  background: url("/images/background2.png") center center no-repeat;
+  background-position: center center;
+  background-repeat: no-repeat;
   background-size: contain;   /* книга всегда полностью помещается */
   background-color: #000;     /* вокруг заполняем чёрным */
 

@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import LoginModal from "./LoginModal";
 
+// ✅ импортируем картинку через Vite
+import background from "../assets/images/background.png";
+
 const REGIONS = [
   "Ангола",
   "Афганистан",
@@ -33,9 +36,10 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
 
   return (
       <div className="map">
+        {/* ✅ используем переменную background */}
         <img
             className="map-image"
-            src="/images/background.png"  // ← напрямую из public/
+            src={background}
             alt="map"
             draggable={false}
         />

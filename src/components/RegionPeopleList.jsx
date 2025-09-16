@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import bg2 from "../assets/images/background2.png";   // <-- импорт фона
 
 /** Безопасно достаём год из YYYY-MM-DD */
 function birthYear(dateStr) {
@@ -13,9 +14,9 @@ export default function RegionPeopleList({
                                            onSelect,
                                            onBackToMap,
                                            onShowAll,
-                                           onAdd,           // () => void | undefined
+                                           onAdd, // () => void | undefined
                                            isAdmin = false,
-                                           onAdminLogout,   // () => Promise<void>
+                                           onAdminLogout, // () => Promise<void>
                                          }) {
   const regionPeople = useMemo(
       () => (people || []).filter((p) => p.region === region),
@@ -23,7 +24,16 @@ export default function RegionPeopleList({
   );
 
   return (
-      <div className="book-container">
+      <div
+          className="book-container"
+          style={{
+            backgroundImage: `url(${bg2})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundColor: "#000",
+          }}
+      >
         {/* Левая страница */}
         <div className="book-page left-page">
           <h1>КНИГА ПАМЯТИ</h1>
@@ -38,11 +48,19 @@ export default function RegionPeopleList({
           {isAdmin && (
               <>
                 {onAdd && (
-                    <button className="back-button" style={{ marginTop: 16 }} onClick={onAdd}>
+                    <button
+                        className="back-button"
+                        style={{ marginTop: 16 }}
+                        onClick={onAdd}
+                    >
                       ➕ Добавить человека
                     </button>
                 )}
-                <button className="back-button" style={{ marginTop: 8 }} onClick={() => onAdminLogout?.()}>
+                <button
+                    className="back-button"
+                    style={{ marginTop: 8 }}
+                    onClick={() => onAdminLogout?.()}
+                >
                   ⇦ Выйти из админ-режима
                 </button>
               </>
@@ -59,13 +77,15 @@ export default function RegionPeopleList({
               <tr>
                 <th>ФИО</th>
                 <th>Год рождения</th>
-                {/*<th></th>*/}
               </tr>
               </thead>
               <tbody>
               {regionPeople.length === 0 ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: "center", padding: "16px" }}>
+                    <td
+                        colSpan={3}
+                        style={{ textAlign: "center", padding: "16px" }}
+                    >
                       В этом регионе пока нет записей.
                     </td>
                   </tr>
@@ -74,7 +94,6 @@ export default function RegionPeopleList({
                       <tr key={p.id} onClick={() => onSelect && onSelect(p)}>
                         <td>{p.name}</td>
                         <td>{birthYear(p.birthDate)}</td>
-                        {/*<td></td>*/}
                       </tr>
                   ))
               )}

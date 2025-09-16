@@ -1,35 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import { REGIONS } from "../data/regions";
+import bg2 from "../assets/images/background2.png";   // <-- импортируем фон через Vite
 
 // helpers
 function splitFullName(full) {
-  if (!full || typeof full !== 'string') return { lastName: '', firstName: '', middleName: '' };
-  const parts = full.replace(/\s+/g, ' ').trim().split(' ');
-  if (parts.length === 1) return { lastName: parts[0], firstName: '', middleName: '' };
-  if (parts.length === 2) return { lastName: parts[0], firstName: parts[1], middleName: '' };
-  return { lastName: parts[0], firstName: parts[1], middleName: parts.slice(2).join(' ') };
+  if (!full || typeof full !== "string") return { lastName: "", firstName: "", middleName: "" };
+  const parts = full.replace(/\s+/g, " ").trim().split(" ");
+  if (parts.length === 1) return { lastName: parts[0], firstName: "", middleName: "" };
+  if (parts.length === 2) return { lastName: parts[0], firstName: parts[1], middleName: "" };
+  return { lastName: parts[0], firstName: parts[1], middleName: parts.slice(2).join(" ") };
 }
 
 function normalizeDate(input) {
-  if (!input) return '';
+  if (!input) return "";
   if (/^\d{4}-\d{2}-\d{2}$/.test(input)) return input;
   if (/^\d{2}\.\d{2}\.\d{4}$/.test(input)) {
-    const [d, m, y] = input.split('.');
+    const [d, m, y] = input.split(".");
     return `${y}-${m}-${d}`;
   }
   return input;
 }
 
-export default function PersonForm({ initialData = {}, onSave, onCancel, onBackToMap, isAdmin, onAdminLogout }) {
+export default function PersonForm({
+                                     initialData = {},
+                                     onSave,
+                                     onCancel,
+                                     onBackToMap,
+                                     isAdmin,
+                                     onAdminLogout,
+                                   }) {
   const [formData, setFormData] = useState({
     id: null,
-    firstName: '',
-    lastName: '',
-    middleName: '',
-    birthDate: '',
-    region: '',
-    photoPath: '',
-    biography: ''
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    birthDate: "",
+    region: "",
+    photoPath: "",
+    biography: "",
   });
   const [previewURL, setPreviewURL] = useState(null);
 
@@ -37,23 +45,23 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
     if (!initialData) return;
     const patched = { ...initialData };
     if (!patched.birthDate && patched.birthYear) {
-      const y = String(patched.birthYear).padStart(4, '0');
+      const y = String(patched.birthYear).padStart(4, "0");
       patched.birthDate = `${y}-01-01`;
     }
-    patched.birthDate = normalizeDate(patched.birthDate || '');
+    patched.birthDate = normalizeDate(patched.birthDate || "");
     if (patched.name && !patched.lastName && !patched.firstName && !patched.middleName) {
       const { lastName, firstName, middleName } = splitFullName(patched.name);
       patched.lastName = lastName;
       patched.firstName = firstName;
       patched.middleName = middleName;
     }
-    setFormData(prev => ({ ...prev, ...patched }));
+    setFormData((prev) => ({ ...prev, ...patched }));
     setPreviewURL(patched.photoPath ? `/photos/${patched.photoPath}` : null);
   }, [initialData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePhotoChange = async (e) => {
@@ -76,7 +84,7 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
       });
     }
 
-    setFormData(prev => ({ ...prev, photoPath: savedFileName }));
+    setFormData((prev) => ({ ...prev, photoPath: savedFileName }));
     setPreviewURL(`photos://${savedFileName}`);
   };
 
@@ -84,11 +92,13 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
     e.preventDefault();
     const personData = {
       id: formData.id,
-      name: `${formData.lastName} ${formData.firstName} ${formData.middleName}`.replace(/\s+/g, ' ').trim(),
+      name: `${formData.lastName} ${formData.firstName} ${formData.middleName}`
+          .replace(/\s+/g, " ")
+          .trim(),
       birthDate: normalizeDate(formData.birthDate) || null,
       region: formData.region,
       biography: formData.biography,
-      photoPath: formData.photoPath
+      photoPath: formData.photoPath,
     };
     try {
       if (formData.id) {
@@ -103,12 +113,25 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
   };
 
   return (
-      <div className="book-container">
+      <div
+          className="book-container"
+          style={{
+            backgroundImage: `url(${bg2})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            backgroundColor: "#000",
+          }}
+      >
         {/* Левая страница */}
         <div className="book-page left-page">
           <h1>КНИГА ПАМЯТИ</h1>
-          <button onClick={onCancel} className="back-button">← Вернуться к списку</button>
-          <button onClick={onBackToMap} className="back-button">← Выход на карту мира</button>
+          <button onClick={onCancel} className="back-button">
+            ← Вернуться к списку
+          </button>
+          <button onClick={onBackToMap} className="back-button">
+            ← Выход на карту мира
+          </button>
           {isAdmin && (
               <button
                   className="back-button"
@@ -130,7 +153,7 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
                 type="text"
                 name="lastName"
                 placeholder="Фамилия"
-                value={formData.lastName || ''}
+                value={formData.lastName || ""}
                 onChange={handleChange}
                 required
             />
@@ -138,7 +161,7 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
                 type="text"
                 name="firstName"
                 placeholder="Имя"
-                value={formData.firstName || ''}
+                value={formData.firstName || ""}
                 onChange={handleChange}
                 required
             />
@@ -146,37 +169,43 @@ export default function PersonForm({ initialData = {}, onSave, onCancel, onBackT
                 type="text"
                 name="middleName"
                 placeholder="Отчество"
-                value={formData.middleName || ''}
+                value={formData.middleName || ""}
                 onChange={handleChange}
             />
 
             <input
                 type="date"
                 name="birthDate"
-                value={formData.birthDate || ''}
+                value={formData.birthDate || ""}
                 onChange={handleChange}
             />
 
             <select
                 name="region"
-                value={formData.region || ''}
+                value={formData.region || ""}
                 onChange={handleChange}
                 required
             >
               <option value="">Выберите регион</option>
-              {REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
+              {REGIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+              ))}
             </select>
 
             <textarea
                 name="biography"
                 placeholder="Биография"
-                value={formData.biography || ''}
+                value={formData.biography || ""}
                 onChange={handleChange}
             />
 
             <div className="form-buttons">
               <button type="submit">💾 Сохранить</button>
-              <button type="button" onClick={onCancel}>✖ Отмена</button>
+              <button type="button" onClick={onCancel}>
+                ✖ Отмена
+              </button>
             </div>
           </form>
         </div>
