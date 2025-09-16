@@ -1,14 +1,14 @@
 /* === Fonts: IBM Plex Mono (Regular + Bold) === */
 @font-face {
   font-family: "IBMPlexMono";
-  src: url("/fonts/IBMPlexMono-Regular.ttf") format("truetype");
+  src: url("./fonts/IBMPlexMono-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "IBMPlexMono";
-  src: url("/fonts/IBMPlexMono-Bold.ttf") format("truetype");
+  src: url("./fonts/IBMPlexMono-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -28,23 +28,6 @@
 html, body {
   font-family: var(--font-ui);
   font-weight: 400;
-}
-
-/* Заголовки и важные элементы */
-h1, h2, h3, b, strong,
-.region-button,
-.back-button,
-.edit-button,
-.delete-button,
-.right-page th {
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-/* ==== БАЗОВОЕ ==== */
-*, *::before, *::after { box-sizing: border-box; }
-
-html, body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -52,12 +35,14 @@ html, body {
   background: #000;
 }
 
+/* ==== БАЗОВОЕ ==== */
+*, *::before, *::after { box-sizing: border-box; }
+
 .app {
   width: 100%;
   height: 100%;
 }
 
-/* ==== КАРТА ==== */
 /* ==== КАРТА ==== */
 .map {
   position: relative;
@@ -67,17 +52,13 @@ html, body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-
-  /* фон теперь задаём здесь */
-  /*background: url("./../public/assets/images/background.png") no-repeat center center;*/
-  background-size: cover;
+  background: #000;
 }
-
 
 .map-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* всегда заполняет экран */
   object-position: center;
   display: block;
   pointer-events: none;
@@ -142,7 +123,11 @@ html, body {
   column-gap: var(--seam-gap);
   justify-content: center;
   align-items: center;
-  background: url("/images/background2.png") center/cover no-repeat;
+
+  background: url("./images/background2.png") center center no-repeat;
+  background-size: contain;   /* книга всегда полностью помещается */
+  background-color: #000;     /* вокруг заполняем чёрным */
+
   height: 100vh;
   width: 100%;
   overflow: hidden;
