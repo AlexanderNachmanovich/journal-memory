@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LoginModal from "./LoginModal";
 
 // ✅ импортируем картинку через Vite
-import background from "../assets/images/bg.png";
+import bg from "../assets/images/bg.png";
 
 const REGIONS = [
   "Ангола",
@@ -39,7 +39,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
         {/* ✅ используем переменную background */}
         <img
             className="map-image"
-            src={background}
+            src={bg}
             alt="map"
             draggable={false}
         />
