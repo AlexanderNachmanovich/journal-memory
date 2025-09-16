@@ -123,14 +123,6 @@ html, body {
   column-gap: var(--seam-gap);
   justify-content: center;
   align-items: center;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: contain;   /* книга всегда полностью помещается */
-  background-color: #000;     /* вокруг заполняем чёрным */
-
-  height: 100vh;
-  width: 100%;
-  overflow: hidden;
 }
 
 .book-page {
