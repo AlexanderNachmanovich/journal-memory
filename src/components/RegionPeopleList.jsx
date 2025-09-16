@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import bg2 from "../assets/images/background2.png";   // <-- импорт фона
+import bg2 from "../assets/images/bg2.png";   // <-- импорт фона
 
 /** Безопасно достаём год из YYYY-MM-DD */
 function birthYear(dateStr) {

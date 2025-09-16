@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LoginModal from "./LoginModal";
 
 // ✅ импортируем картинку через Vite
-import background from "../assets/images/background.png";
+import background from "../assets/images/bg.png";
 
 const REGIONS = [
   "Ангола",

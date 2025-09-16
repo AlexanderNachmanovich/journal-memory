@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { REGIONS } from "../data/regions";
-import bg2 from "../assets/images/background2.png";   // <-- импортируем фон через Vite
+import bg2 from "../assets/images/bg2.png";   // <-- импортируем фон через Vite
 
 // helpers
 function splitFullName(full) {

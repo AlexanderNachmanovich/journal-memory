@@ -1,5 +1,5 @@
 import React from "react";
-import bg2 from "../assets/images/background2.png";   // импортируем фон через Vite
+import bg2 from "../assets/images/bg2.png";   // импортируем фон через Vite
 
 export default function PersonCard({
                                      person,

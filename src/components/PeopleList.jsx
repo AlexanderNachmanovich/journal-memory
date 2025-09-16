@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import bg2 from "../assets/images/background2.png";   // <-- через Vite import
+import bg2 from "../assets/images/bg2.png";   // <-- через Vite import
 
 function birthYear(dateStr) {
   if (!dateStr) return "";
