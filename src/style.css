@@ -1,14 +1,14 @@
 /* === Fonts: IBM Plex Mono (Regular + Bold) === */
 @font-face {
   font-family: "IBMPlexMono";
-  src: url("./fonts/IBMPlexMono-Regular.ttf") format("truetype");
+  src: url("/fonts/IBMPlexMono-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "IBMPlexMono";
-  src: url("./fonts/IBMPlexMono-Bold.ttf") format("truetype");
+  src: url("/fonts/IBMPlexMono-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -124,7 +124,7 @@ html, body {
   justify-content: center;
   align-items: center;
 
-  background: url("./images/background2.png") center center no-repeat;
+  background: url("/images/background2.png") center center no-repeat;
   background-size: contain;   /* книга всегда полностью помещается */
   background-color: #000;     /* вокруг заполняем чёрным */
 
