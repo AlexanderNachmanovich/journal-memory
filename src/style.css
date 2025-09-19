@@ -14,15 +14,15 @@
   font-display: swap;
 }
 
-/* Глобально используем новый шрифт + параметры разворота */
+/* Глобальные переменные */
 :root {
   --font-ui: "IBMPlexMono", Menlo, Consolas, "Liberation Mono", monospace;
 
-  /* Параметры разворота книги */
+  /* Разворот книги */
   --page-w: 36%;
   --seam-gap: 3.6%;
-  --left-nudge: 15.2%;
-  --right-nudge: -5.8%;
+  --left-nudge: 10%;
+  --right-nudge: 15.2%;
 }
 
 html, body {
@@ -31,11 +31,12 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden;
   background: #000;
+
+  /* ✅ dropdown работает */
+  overflow: visible !important;
 }
 
-/* ==== БАЗОВОЕ ==== */
 *, *::before, *::after { box-sizing: border-box; }
 
 .app {
@@ -51,20 +52,19 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
   background: #000;
+  overflow: hidden;
 }
 
 .map-image {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* всегда заполняет экран */
+  object-fit: cover;
   object-position: center;
   display: block;
   pointer-events: none;
 }
 
-/* Панель кнопок */
 .region-buttons {
   position: absolute;
   bottom: 20%;
@@ -76,7 +76,6 @@ html, body {
   z-index: 10;
 }
 
-/* Кнопки регионов */
 .region-button {
   background: #c19a6b;
   border: 2px solid #8b5e3c;
@@ -92,7 +91,7 @@ html, body {
 .region-button:hover { background: #d2b48c; transform: translateY(-2px); }
 .region-button:active { background: #a67c52; transform: translateY(1px); }
 
-/* FAB администратора */
+/* ==== FAB администратора ==== */
 .admin-fab {
   position: fixed;
   left: 24px;
@@ -110,7 +109,6 @@ html, body {
   cursor: pointer;
   user-select: none;
   z-index: 2147483647;
-  pointer-events: auto;
   transition: transform .15s ease, background .15s ease;
 }
 .admin-fab:hover  { background:#d2b48c; transform: translateY(-2px); }
@@ -118,95 +116,65 @@ html, body {
 
 /* ==== КНИГА ==== */
 .book-container {
-  display: grid;
-  grid-template-columns: var(--page-w) var(--page-w);
-  column-gap: var(--seam-gap);
-  justify-content: center;
-  align-items: center;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-size: contain;   /* книга всегда полностью помещается */
-  background-color: #000;     /* вокруг заполняем чёрным */
-
-  height: 100vh;
+  position: relative;
   width: 100%;
-  overflow: hidden;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background-image: var(--book-bg);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  overflow: visible !important;
+  z-index: 0;
+}
+
+.book-wrapper {
+  position: relative;
+  width: 90%;
+  aspect-ratio: 3/2;
+  overflow: visible !important;
+  z-index: 1;
 }
 
 .book-page {
-  height: 83%;
+  position: absolute;
+  top: 12%;
+  bottom: 12%;
+  width: var(--page-w);
   padding: 2% 2.5%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  position: relative;
+  overflow: visible !important;
+  z-index: 2;
 }
 
 .left-page {
+  left: var(--left-nudge);
   text-align: center;
-  max-width: 80%;
-  transform: translateX(var(--left-nudge));
 }
-
 .right-page {
-  transform: translateX(var(--right-nudge));
+  right: var(--right-nudge);
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  overflow: hidden;
-  max-width: 80%;
 }
 
-/* Таблица */
-.right-page table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.right-page th,
-.right-page td {
-  border: 1px solid #000;
-  padding: 8px;
-  text-align: left;
-}
-
-/* ==== ДЕТАЛЬ ЧЕЛОВЕКА ==== */
-.person-details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  overflow: hidden;
-}
-.person-details > * { max-width: 100%; }
-
-.person-photo {
-  width: 220px;
-  margin-bottom: 20px;
-  border: 3px solid #3e2f1c;
-  filter: sepia(100%) contrast(90%) brightness(95%);
-  box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-}
-
-/* Биография */
-.biography-box {
-  margin-top: 15px;
-  max-height: calc(100vh - 420px);
-  overflow-y: auto;
-  text-align: left;
-  line-height: 1.5;
-  max-width: 90%;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.biography-box::-webkit-scrollbar { display: none; }
-
-/* ==== ФОРМА ==== */
+/* ==== Форма ==== */
 .person-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.person-form::-webkit-scrollbar { display: none; }
+
 .person-form input,
 .person-form select,
 .person-form textarea {
@@ -215,8 +183,23 @@ html, body {
   border: 1px solid #8b5e3c;
   border-radius: 4px;
   background: #f5f0e6;
+  position: relative;
+  z-index: 9999 !important;
+  pointer-events: auto;
 }
-.person-form textarea { min-height: 100px; resize: vertical; }
+
+.person-form select {
+  appearance: auto !important;
+
+    position: relative;
+    z-index: 9999;
+
+}
+
+.person-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
 
 .form-buttons {
   display: flex;
@@ -233,10 +216,70 @@ html, body {
   color: #2e1b0e;
   box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   transition: all 0.2s;
+  position: relative;
+  z-index: 9999 !important;
 }
 .form-buttons button:hover { background: #d2b48c; }
 
-/* ==== КНОПКИ СЛЕВА ==== */
+/* ==== Таблица ==== */
+.right-page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.right-page th,
+.right-page td {
+  border: 1px solid #000;
+  padding: 8px;
+  text-align: left;
+}
+
+.people-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s ease-in-out;
+}
+.people-table tbody tr:hover { background: rgba(0, 0, 0, 0.06); }
+
+.people-scroll {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.people-scroll::-webkit-scrollbar { display: none; }
+
+/* ==== Деталь человека ==== */
+.person-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.person-details > * { max-width: 100%; }
+
+.person-photo {
+  width: 220px;
+  margin-bottom: 20px;
+  border: 3px solid #3e2f1c;
+  filter: sepia(100%) contrast(90%) brightness(95%);
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+}
+
+.biography-box {
+  margin-top: 15px;
+  max-height: calc(100vh - 420px);
+  overflow-y: auto;
+  text-align: left;
+  line-height: 1.5;
+  max-width: 90%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.biography-box::-webkit-scrollbar { display: none; }
+
+/* ==== Кнопки ==== */
 .back-button,
 .edit-button,
 .delete-button {
@@ -262,24 +305,7 @@ html, body {
 .edit-button:active,
 .delete-button:active { background: #a67c52; transform: translateY(1px); }
 
-/* ==== СПИСОК ЛЮДЕЙ ==== */
-.people-table tbody tr {
-  cursor: pointer;
-  transition: background 0.15s ease-in-out;
-}
-.people-table tbody tr:hover { background: rgba(0, 0, 0, 0.06); }
-
-.people-scroll {
-  flex: 1;
-  min-height: 0;
-  width: 100%;
-  overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.people-scroll::-webkit-scrollbar { display: none; }
-
-/* ==== МОДАЛКА ==== */
+/* ==== Модалка ==== */
 .login-backdrop {
   position: fixed;
   inset: 0;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { REGIONS } from "../data/regions";
-import bg2 from "../assets/images/bg2.png";   // <-- импортируем фон через Vite
+import bg2 from "../assets/images/bg2.png";   // фон книги
 
 // helpers
 function splitFullName(full) {
@@ -42,19 +42,35 @@ export default function PersonForm({
   const [previewURL, setPreviewURL] = useState(null);
 
   useEffect(() => {
+    // фон книги через CSS-переменную
+    document.documentElement.style.setProperty("--book-bg", `url(${bg2})`);
+  }, []);
+
+  useEffect(() => {
     if (!initialData) return;
     const patched = { ...initialData };
+
+    // нормализуем регион (сравнение без регистра и лишних пробелов)
+    if (patched.region) {
+      const match = REGIONS.find(
+          (r) => r.toLowerCase().trim() === patched.region.toLowerCase().trim()
+      );
+      patched.region = match || patched.region.trim();
+    }
+
     if (!patched.birthDate && patched.birthYear) {
       const y = String(patched.birthYear).padStart(4, "0");
       patched.birthDate = `${y}-01-01`;
     }
     patched.birthDate = normalizeDate(patched.birthDate || "");
+
     if (patched.name && !patched.lastName && !patched.firstName && !patched.middleName) {
       const { lastName, firstName, middleName } = splitFullName(patched.name);
       patched.lastName = lastName;
       patched.firstName = firstName;
       patched.middleName = middleName;
     }
+
     setFormData((prev) => ({ ...prev, ...patched }));
     setPreviewURL(patched.photoPath ? `/photos/${patched.photoPath}` : null);
   }, [initialData]);
@@ -90,16 +106,23 @@ export default function PersonForm({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // нормализуем регион перед сохранением
+    let region = formData.region?.trim() || "";
+    const match = REGIONS.find((r) => r.toLowerCase() === region.toLowerCase());
+    region = match || region;
+
     const personData = {
       id: formData.id,
       name: `${formData.lastName} ${formData.firstName} ${formData.middleName}`
           .replace(/\s+/g, " ")
           .trim(),
       birthDate: normalizeDate(formData.birthDate) || null,
-      region: formData.region,
+      region,
       biography: formData.biography,
       photoPath: formData.photoPath,
     };
+
     try {
       if (formData.id) {
         await window.api.updatePerson(personData);
@@ -113,101 +136,94 @@ export default function PersonForm({
   };
 
   return (
-      <div
-          className="book-container"
-          style={{
-            backgroundImage: `url(${bg2})`,
-            backgroundSize: "contain",
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "center",
-            backgroundColor: "#000",
-          }}
-      >
-        {/* Левая страница */}
-        <div className="book-page left-page">
-          <h1>КНИГА ПАМЯТИ</h1>
-          <button onClick={onCancel} className="back-button">
-            ← Вернуться к списку
-          </button>
-          <button onClick={onBackToMap} className="back-button">
-            ← Выход на карту мира
-          </button>
-          {isAdmin && (
-              <button
-                  className="back-button"
-                  style={{ marginTop: 8 }}
-                  onClick={() => onAdminLogout?.()}
+      <div className="book-container">
+        <div className="book-wrapper">
+          {/* Левая страница */}
+          <div className="book-page left-page">
+            <h1>КНИГА ПАМЯТИ</h1>
+            <button onClick={onCancel} className="back-button">
+              ← Вернуться к списку
+            </button>
+            <button onClick={onBackToMap} className="back-button">
+              ← Выход на карту мира
+            </button>
+            {isAdmin && (
+                <button
+                    className="back-button"
+                    style={{ marginTop: 8 }}
+                    onClick={() => onAdminLogout?.()}
+                >
+                  ⇦ Выйти из админ-режима
+                </button>
+            )}
+          </div>
+
+          {/* Правая страница */}
+          <div className="book-page right-page">
+            <form className="person-form" onSubmit={handleSubmit}>
+              {previewURL && <img src={previewURL} alt="Фото" className="person-photo" />}
+              <input type="file" accept="image/*" onChange={handlePhotoChange} />
+
+              <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Фамилия"
+                  value={formData.lastName || ""}
+                  onChange={handleChange}
+                  required
+              />
+              <input
+                  type="text"
+                  name="firstName"
+                  placeholder="Имя"
+                  value={formData.firstName || ""}
+                  onChange={handleChange}
+                  required
+              />
+              <input
+                  type="text"
+                  name="middleName"
+                  placeholder="Отчество"
+                  value={formData.middleName || ""}
+                  onChange={handleChange}
+              />
+
+              <input
+                  type="date"
+                  name="birthDate"
+                  value={formData.birthDate || ""}
+                  onChange={handleChange}
+              />
+
+              <select
+                  name="region"
+                  value={formData.region || ""}
+                  onChange={handleChange}
+                  required
               >
-                ⇦ Выйти из админ-режима
-              </button>
-          )}
-        </div>
+                <option value="">Выберите регион</option>
+                {REGIONS.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                ))}
+              </select>
 
-        {/* Правая страница */}
-        <div className="book-page right-page">
-          <form className="person-form" onSubmit={handleSubmit}>
-            {previewURL && <img src={previewURL} alt="Фото" className="person-photo" />}
-            <input type="file" accept="image/*" onChange={handlePhotoChange} />
+              <textarea
+                  name="biography"
+                  placeholder="Биография"
+                  value={formData.biography || ""}
+                  onChange={handleChange}
+              />
 
-            <input
-                type="text"
-                name="lastName"
-                placeholder="Фамилия"
-                value={formData.lastName || ""}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="text"
-                name="firstName"
-                placeholder="Имя"
-                value={formData.firstName || ""}
-                onChange={handleChange}
-                required
-            />
-            <input
-                type="text"
-                name="middleName"
-                placeholder="Отчество"
-                value={formData.middleName || ""}
-                onChange={handleChange}
-            />
-
-            <input
-                type="date"
-                name="birthDate"
-                value={formData.birthDate || ""}
-                onChange={handleChange}
-            />
-
-            <select
-                name="region"
-                value={formData.region || ""}
-                onChange={handleChange}
-                required
-            >
-              <option value="">Выберите регион</option>
-              {REGIONS.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-              ))}
-            </select>
-
-            <textarea
-                name="biography"
-                placeholder="Биография"
-                value={formData.biography || ""}
-                onChange={handleChange}
-            />
-
-            <div className="form-buttons">
-              <button type="submit">💾 Сохранить</button>
-              <button type="button" onClick={onCancel}>
-                ✖ Отмена
-              </button>
-            </div>
-          </form>
+              <div className="form-buttons">
+                <button type="submit">💾 Сохранить</button>
+                <button type="button" onClick={onCancel}>
+                  ✖ Отмена
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
   );
