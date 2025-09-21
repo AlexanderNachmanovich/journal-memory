@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { REGIONS } from "../data/regions";
 import bg2 from "../assets/images/bg2.png";   // фон книги
+import CustomSelect from "./CustomSelect";
 
 // helpers
 function splitFullName(full) {
@@ -195,19 +196,12 @@ export default function PersonForm({
                   onChange={handleChange}
               />
 
-              <select
-                  name="region"
-                  value={formData.region || ""}
-                  onChange={handleChange}
-                  required
-              >
-                <option value="">Выберите регион</option>
-                {REGIONS.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                ))}
-              </select>
+              <CustomSelect
+                  options={REGIONS.map(r => ({ value: r, label: r }))}
+                  value={formData.region}
+                  onChange={(val) => setFormData({ ...formData, region: val })}
+                  placeholder="Выберите регион"
+              />
 
               <textarea
                   name="biography"

@@ -6,7 +6,7 @@ const db = require('./db');
 
 const isDev = !app.isPackaged;
 
-// ----------------- CONFIG (пароль админа в открытом виде) -----------------
+// ----------------- CONFIG -----------------
 const configPath = path.join(app.getPath('userData'), 'config.json');
 
 function readConfig() {
@@ -28,7 +28,6 @@ function writeConfig(cfg) {
   }
 }
 
-// По умолчанию пароль 23103 (можно поменять через IPC 'auth-change-password')
 function ensureConfig() {
   let cfg = readConfig();
   if (!cfg) cfg = {};
@@ -40,7 +39,7 @@ function ensureConfig() {
 }
 
 let CONFIG = null;
-const adminSessions = new Set(); // храним webContents.id админских сессий
+const adminSessions = new Set();
 
 function isAdminEvent(event) {
   return adminSessions.has(event.sender.id);
@@ -55,8 +54,10 @@ function createWindow() {
     minHeight: 700,
     show: false,
     webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
+      contextIsolation: true,      // 🔙 вернуть безопасность
+      nodeIntegration: false,      // 🔙 как раньше
+      sandbox: false,              // ⚡️ фикс для <select>
+      enableBlinkFeatures: "HTMLSelectPopover", // поддержка селекта
       preload: path.join(__dirname, 'preload.js'),
     },
   });
@@ -70,10 +71,10 @@ function createWindow() {
   }
 
   win.webContents.on('destroyed', () => {
-    // чистим сессию при закрытии webcontents
     adminSessions.delete(win.webContents.id);
   });
 }
+
 
 // 📂 папка для фото
 const photosDir = path.join(app.getPath('userData'), 'photos');
@@ -109,11 +110,8 @@ ipcMain.handle('auth-logout', (event) => {
   return { ok: true };
 });
 
-// Можно менять пароль из UI (если понадобится)
 ipcMain.handle('auth-change-password', (event, { oldPassword, newPassword }) => {
-  if (!isAdminEvent(event)) {
-    throw new Error('Not authorized');
-  }
+  if (!isAdminEvent(event)) throw new Error('Not authorized');
   if (!oldPassword || !newPassword) {
     return { ok: false, error: 'EMPTY_FIELDS' };
   }
@@ -130,7 +128,7 @@ ipcMain.handle('get-persons', () => {
   return db.prepare('SELECT * FROM persons').all();
 });
 
-// ---------- WRITE (только администратор) ----------
+// ---------- WRITE ----------
 ipcMain.handle('add-person', (event, person) => {
   if (!isAdminEvent(event)) throw new Error('Not authorized');
   const stmt = db.prepare(`
@@ -157,7 +155,6 @@ ipcMain.handle('update-person', (event, person) => {
 
 ipcMain.handle('delete-person', (event, id) => {
   if (!isAdminEvent(event)) throw new Error('Not authorized');
-
   const person = db.prepare('SELECT * FROM persons WHERE id = ?').get(id);
   if (person && person.photoPath) {
     const photoFile = path.join(photosDir, person.photoPath);
@@ -168,7 +165,7 @@ ipcMain.handle('delete-person', (event, id) => {
   return db.prepare('DELETE FROM persons WHERE id = ?').run(id);
 });
 
-// 📌 сохранить/заменить фото (тоже только админ)
+// ---------- SAVE/REPLACE PHOTO ----------
 ipcMain.handle('save-photo', (event, { tempPath, fileName }) => {
   if (!isAdminEvent(event)) throw new Error('Not authorized');
   const destPath = path.join(photosDir, fileName);
@@ -208,7 +205,6 @@ if (!gotLock) {
   app.whenReady().then(() => {
     CONFIG = ensureConfig();
 
-    // протокол для загрузки фото: photos://filename.jpg
     protocol.registerFileProtocol('photos', (request, callback) => {
       const url = request.url.replace('photos://', '');
       const filePath = path.join(photosDir, decodeURIComponent(url));

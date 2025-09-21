@@ -32,9 +32,7 @@ html, body {
   padding: 0;
   height: 100%;
   background: #000;
-
-  /* ✅ dropdown работает */
-  overflow: visible !important;
+  overflow: hidden; /* 🔑 dropdown работает */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -123,22 +121,28 @@ html, body {
   align-items: center;
   justify-content: center;
 
+  /* фон книги / карты */
   background-image: var(--book-bg);
-  background-size: cover;
+  background-size: cover;      /* ✅ растягивается на весь экран */
   background-repeat: no-repeat;
   background-position: center;
 
-  overflow: visible !important;
+  overflow: hidden;
   z-index: 0;
+  pointer-events: none; /* фон не перехватывает клики */
+
 }
 
 .book-wrapper {
   position: relative;
-  width: 90%;
+  width: 90%;       /* контролируем только область страниц */
   aspect-ratio: 3/2;
-  overflow: visible !important;
+  overflow: visible;
   z-index: 1;
+  pointer-events: none;
 }
+
+
 
 .book-page {
   position: absolute;
@@ -148,8 +152,10 @@ html, body {
   padding: 2% 2.5%;
   display: flex;
   flex-direction: column;
-  overflow: visible !important;
+  overflow: hidden;
   z-index: 2;
+
+  pointer-events: auto; /* страницы активные */
 }
 
 .left-page {
@@ -184,16 +190,11 @@ html, body {
   border-radius: 4px;
   background: #f5f0e6;
   position: relative;
-  z-index: 9999 !important;
-  pointer-events: auto;
 }
 
 .person-form select {
-  appearance: auto !important;
-
-    position: relative;
-    z-index: 9999;
-
+  -webkit-appearance: menulist !important;
+  appearance: menulist !important;
 }
 
 .person-form textarea {
@@ -216,8 +217,6 @@ html, body {
   color: #2e1b0e;
   box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
   transition: all 0.2s;
-  position: relative;
-  z-index: 9999 !important;
 }
 .form-buttons button:hover { background: #d2b48c; }
 
@@ -359,4 +358,59 @@ html, body {
   cursor: pointer;
   font-weight: 700;
   color: #2e1b0e;
+}
+
+/* ==== КАСТОМНЫЙ SELECT ==== */
+.custom-select {
+  position: relative;
+  font-size: 14px;
+  width: 100%;
+}
+
+.custom-select__control {
+  background: #f5f0e6;
+  border: 1px solid #8b5e3c;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #2e1b0e;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.custom-select__arrow {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #5c3b26;
+}
+
+.custom-select__menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #f5f0e6;
+  border: 1px solid #8b5e3c;
+  border-radius: 6px;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.35);
+  z-index: 9999;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.custom-select__option {
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.custom-select__option:hover {
+  background: #d2b48c;
+}
+
+.custom-select__option.selected {
+  background: #c19a6b;
+  font-weight: bold;
 }
