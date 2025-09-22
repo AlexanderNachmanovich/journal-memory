@@ -20,4 +20,7 @@ contextBridge.exposeInMainWorld('api', {
   logout: () => ipcRenderer.invoke('auth-logout'),
   changeAdminPassword: (oldPassword, newPassword) =>
       ipcRenderer.invoke('auth-change-password', { oldPassword, newPassword }),
+
+  // APP
+  appQuit: () => ipcRenderer.invoke('app-quit'),
 });

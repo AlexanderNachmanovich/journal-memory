@@ -21,8 +21,8 @@
   /* Разворот книги */
   --page-w: 36%;
   --seam-gap: 3.6%;
-  --left-nudge: 10%;
-  --right-nudge: 15.2%;
+  --left-nudge: 12.5%;
+  --right-nudge: 11.2%;
 }
 
 html, body {
@@ -65,7 +65,7 @@ html, body {
 
 .region-buttons {
   position: absolute;
-  bottom: 20%;
+  bottom: 10%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 15px;
@@ -121,11 +121,16 @@ html, body {
   align-items: center;
   justify-content: center;
 
+  object-fit: cover;
+  object-position: center;
+  /*display: block;*/
+  pointer-events: none;
+
   /* фон книги / карты */
   background-image: var(--book-bg);
-  background-size: cover;      /* ✅ растягивается на весь экран */
+  background-size: contain;      /* ✅ растягивается на весь экран */
   background-repeat: no-repeat;
-  background-position: center;
+  /*background-position: center;*/
 
   overflow: hidden;
   z-index: 0;

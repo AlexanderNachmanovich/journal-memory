@@ -49,15 +49,17 @@ function isAdminEvent(event) {
 
 function createWindow() {
   const win = new BrowserWindow({
-    fullscreen: true,
+    fullscreen: true,        // сразу во весь экран
+    // kiosk: true,             // киоск-режим (нельзя случайно выйти)
+    // autoHideMenuBar: true,   // скрыть верхнее меню
     minWidth: 1024,
     minHeight: 700,
     show: false,
     webPreferences: {
-      contextIsolation: true,      // 🔙 вернуть безопасность
-      nodeIntegration: false,      // 🔙 как раньше
-      sandbox: false,              // ⚡️ фикс для <select>
-      enableBlinkFeatures: "HTMLSelectPopover", // поддержка селекта
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      enableBlinkFeatures: "HTMLSelectPopover",
       preload: path.join(__dirname, 'preload.js'),
     },
   });
@@ -186,6 +188,11 @@ ipcMain.handle('replace-photo', (event, { tempPath, fileName, oldFileName }) => 
   }
   return fileName;
 });
+
+ipcMain.handle('app-quit', () => {
+  app.quit();
+});
+
 
 // =======================
 // App lifecycle
