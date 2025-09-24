@@ -23,7 +23,7 @@ if (!fs.existsSync(targetDb)) {
 // Открываем базу в userData
 const db = new Database(targetDb);
 
-// 1) Базовая схема (с новой колонкой birthDate)
+// 1) Базовая схема persons
 db.prepare(`
   CREATE TABLE IF NOT EXISTS persons (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,7 +35,7 @@ db.prepare(`
   )
 `).run();
 
-// 2) Миграция: если таблица существовала раньше без birthDate — добавим колонку
+// 2) Миграция: birthDate
 const columns = db.prepare(`PRAGMA table_info(persons)`).all();
 const hasBirthDate = columns.some(c => c.name === "birthDate");
 const hasBirthYear = columns.some(c => c.name === "birthYear");
@@ -44,7 +44,6 @@ if (!hasBirthDate) {
   db.prepare(`ALTER TABLE persons ADD COLUMN birthDate TEXT`).run();
 }
 
-// 3) Если есть legacy-колонка birthYear — сконвертируем её в YYYY-01-01
 if (hasBirthYear) {
   db.prepare(`
     UPDATE persons
@@ -55,9 +54,34 @@ if (hasBirthYear) {
     END
     WHERE birthDate IS NULL OR TRIM(birthDate) = ''
   `).run();
-
-  // Примечание: удаление столбца в SQLite = перестройка таблицы, это долго.
-  // Мы оставляем birthYear как "мёртвую" колонку, но код её больше не использует.
 }
 
-module.exports = db;
+// 3) Новая таблица conflicts
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS conflicts (
+    region TEXT PRIMARY KEY,
+    text   TEXT
+  )
+`).run();
+
+// Методы для работы с текстами конфликтов
+function getConflictText(region) {
+  const row = db.prepare(
+      `SELECT text FROM conflicts WHERE region = ?`
+  ).get(region);
+  return row ? row.text : "";
+}
+
+function saveConflictText(region, text) {
+  db.prepare(
+      `INSERT INTO conflicts (region, text)
+     VALUES (?, ?)
+     ON CONFLICT(region) DO UPDATE SET text = excluded.text`
+  ).run(region, text);
+}
+
+module.exports = {
+  db,
+  getConflictText,
+  saveConflictText,
+};

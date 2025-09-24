@@ -2,7 +2,8 @@
 const { app, BrowserWindow, ipcMain, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const db = require('./db');
+const { db, getConflictText, saveConflictText } = require('./db');
+
 
 const isDev = !app.isPackaged;
 
@@ -213,6 +214,18 @@ ipcMain.handle('replace-photo', (event, { tempPath, fileName, oldFileName }) => 
 ipcMain.handle('app-quit', () => {
   app.quit();
 });
+
+// ---------- CONFLICTS ----------
+ipcMain.handle('get-conflict-text', (event, region) => {
+  return getConflictText(region);
+});
+
+ipcMain.handle('save-conflict-text', (event, { region, text }) => {
+  if (!isAdminEvent(event)) throw new Error('Not authorized');
+  saveConflictText(region, text);
+  return true;
+});
+
 
 // =======================
 // App lifecycle

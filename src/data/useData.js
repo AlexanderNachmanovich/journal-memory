@@ -31,3 +31,18 @@ export function useData() {
     reload: loadData, // можно вызвать из App.jsx после добавления/удаления
   };
 }
+
+// ====================
+// ⚡ новые функции для конфликтов
+// ====================
+
+export async function getConflictText(region) {
+  try { return window.api ? await window.api.getConflictText(region) : ""; }
+  catch (err) { console.error("Ошибка getConflictText:", err); return ""; }
+}
+
+export async function saveConflictText(region, text) {
+  try { if (window.api) await window.api.saveConflictText(region, text); }
+  catch (err) { console.error("Ошибка saveConflictText:", err); }
+}
+

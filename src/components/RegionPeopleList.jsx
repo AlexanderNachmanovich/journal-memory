@@ -1,12 +1,5 @@
-import React, { useMemo, useEffect } from "react";
-import bg2 from "../assets/images/bg2.png";   // фон книги
-
-/** Безопасно достаём год из YYYY-MM-DD */
-function birthYear(dateStr) {
-  if (!dateStr) return "";
-  const m = /^(\d{4})/.exec(String(dateStr));
-  return m ? m[1] : "";
-}
+import React, { useMemo, useEffect, useState } from "react";
+import bg2 from "../assets/images/bg2.png";
 
 export default function RegionPeopleList({
                                            region,
@@ -15,7 +8,7 @@ export default function RegionPeopleList({
                                            onBackToMap,
                                            onShowAll,
                                            onAdd,
-                                           isAdmin = false,
+                                           isAdmin,
                                            onAdminLogout,
                                          }) {
   const regionPeople = useMemo(
@@ -23,45 +16,97 @@ export default function RegionPeopleList({
       [people, region]
   );
 
-  // Подставляем фон книги через CSS-переменную
+  const [conflictText, setConflictText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [savedMessage, setSavedMessage] = useState("");
+
   useEffect(() => {
     document.documentElement.style.setProperty("--book-bg", `url(${bg2})`);
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const text = await window.api.getConflictText(region);
+        if (mounted) setConflictText(text || "");
+      } catch (e) {
+        console.error("Ошибка загрузки описания конфликта:", e);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [region]);
+
+  const handleSave = async () => {
+    try {
+      await window.api.saveConflictText(region, conflictText);
+      setSavedMessage("✔ Описание сохранено!");
+      setTimeout(() => setSavedMessage(""), 2000);
+    } catch (e) {
+      console.error("Ошибка сохранения описания:", e);
+      setSavedMessage("❌ Ошибка сохранения");
+    }
+  };
 
   return (
       <div className="book-container">
         <div className="book-wrapper">
           {/* Левая страница */}
-          <div className="book-page left-page">
+          <div className="book-page left-page scrollable">
             <h1>КНИГА ПАМЯТИ</h1>
 
-            <button className="back-button" onClick={onBackToMap}>
-              ← Выход на карту мира
-            </button>
-            <button className="back-button" onClick={onShowAll}>
-              → Общий список
-            </button>
-
-            {isAdmin && (
-                <>
-                  {onAdd && (
-                      <button
-                          className="back-button"
-                          style={{ marginTop: 16 }}
-                          onClick={onAdd}
-                      >
-                        ➕ Добавить человека
-                      </button>
-                  )}
-                  <button
-                      className="back-button"
-                      style={{ marginTop: 8 }}
-                      onClick={() => onAdminLogout?.()}
-                  >
-                    ⇦ Выйти из админ-режима
-                  </button>
-                </>
+            {loading ? (
+                <p>Загрузка…</p>
+            ) : !isAdmin ? (
+                <div className="conflict-text centered">
+                  {conflictText || "Описание пока не добавлено."}
+                </div>
+            ) : (
+                <textarea
+                    className="conflict-editor"
+                    value={conflictText}
+                    onChange={(e) => setConflictText(e.target.value)}
+                    rows={10}
+                />
             )}
+
+            {/* Сообщение о сохранении */}
+            {savedMessage && <div className="save-message">{savedMessage}</div>}
+
+            {/* Кнопки */}
+            <div className="left-actions">
+              {isAdmin && (
+                  <button className="back-button" onClick={handleSave}>
+                    💾 Сохранить описание
+                  </button>
+              )}
+              <button className="back-button" onClick={onBackToMap}>
+                ← Выход на карту мира
+              </button>
+              <button className="back-button" onClick={onShowAll}>
+                → Общий список
+              </button>
+              {isAdmin && (
+                  <>
+                    {onAdd && (
+                        <button className="back-button" onClick={onAdd}>
+                          ➕ Добавить человека
+                        </button>
+                    )}
+                    <button
+                        className="back-button"
+                        onClick={() => onAdminLogout?.()}
+                    >
+                      ⇦ Выйти из админ-режима
+                    </button>
+                  </>
+              )}
+            </div>
           </div>
 
           {/* Правая страница */}
@@ -79,7 +124,10 @@ export default function RegionPeopleList({
                 <tbody>
                 {regionPeople.length === 0 ? (
                     <tr>
-                      <td colSpan={3} style={{ textAlign: "center", padding: "16px" }}>
+                      <td
+                          colSpan={3}
+                          style={{ textAlign: "center", padding: "16px" }}
+                      >
                         В этом регионе пока нет записей.
                       </td>
                     </tr>
@@ -87,7 +135,11 @@ export default function RegionPeopleList({
                     regionPeople.map((p) => (
                         <tr key={p.id} onClick={() => onSelect && onSelect(p)}>
                           <td>{p.name}</td>
-                          <td>{birthYear(p.birthDate)}</td>
+                          <td>
+                            {p.birthDate
+                                ? String(p.birthDate).slice(0, 4)
+                                : ""}
+                          </td>
                         </tr>
                     ))
                 )}

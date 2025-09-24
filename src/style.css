@@ -46,7 +46,7 @@ html, body {
 .map {
   position: relative;
   width: 100%;
-  height: 100vh;              /* всегда на весь экран */
+  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -59,8 +59,8 @@ html, body {
   height: 100%;
   max-width: 100%;
   max-height: 100%;
-  object-fit: contain;        /* вписывается целиком */
-  object-position: center;    /* по центру */
+  object-fit: contain;
+  object-position: center;
   display: block;
   pointer-events: none;
 }
@@ -118,16 +118,14 @@ html, body {
 .book-container {
   position: relative;
   width: 100%;
-  height: 100vh;              /* всегда на весь экран */
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-
   background-image: var(--book-bg);
-  background-size: contain;   /* вписывается целиком */
+  background-size: contain;
   background-repeat: no-repeat;
-  background-position: center;/* по центру */
-
+  background-position: center;
   overflow: hidden;
   z-index: 0;
   pointer-events: none;
@@ -135,7 +133,7 @@ html, body {
 
 .book-wrapper {
   position: relative;
-  width: 90%;                 /* контролируем только область страниц */
+  width: 90%;
   aspect-ratio: 3/2;
   overflow: visible;
   z-index: 1;
@@ -152,13 +150,26 @@ html, body {
   flex-direction: column;
   overflow: hidden;
   z-index: 2;
-  pointer-events: auto;       /* страницы активные */
+  pointer-events: auto;
 }
 
 .left-page {
   left: var(--left-nudge);
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;        /* ✅ страница прокручивается */
+  min-height: 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.left-page::-webkit-scrollbar { display: none; }
+
+.left-page h1 {
+  text-align: center;
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
 .right-page {
   right: var(--right-nudge);
   display: flex;
@@ -186,7 +197,6 @@ html, body {
   border: 1px solid #8b5e3c;
   border-radius: 4px;
   background: #f5f0e6;
-  position: relative;
 }
 
 .person-form select {
@@ -222,13 +232,11 @@ html, body {
   width: 100%;
   border-collapse: collapse;
 }
-.right-page th,
-.right-page td {
+.right-page th, .right-page td {
   border: 1px solid #000;
   padding: 8px;
   text-align: left;
 }
-
 .people-table tbody tr {
   cursor: pointer;
   transition: background 0.15s ease-in-out;
@@ -272,13 +280,12 @@ html, body {
   word-break: break-word;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  white-space: pre-wrap;
 }
 .biography-box::-webkit-scrollbar { display: none; }
 
 /* ==== Кнопки ==== */
-.back-button,
-.edit-button,
-.delete-button {
+.back-button, .edit-button, .delete-button {
   background: #c19a6b;
   border: 2px solid #8b5e3c;
   border-radius: 8px;
@@ -294,12 +301,14 @@ html, body {
   margin: 8px auto 0;
   text-align: center;
 }
-.back-button:hover,
-.edit-button:hover,
-.delete-button:hover { background: #d2b48c; transform: translateY(-2px); }
-.back-button:active,
-.edit-button:active,
-.delete-button:active { background: #a67c52; transform: translateY(1px); }
+.back-button:hover, .edit-button:hover, .delete-button:hover {
+  background: #d2b48c;
+  transform: translateY(-2px);
+}
+.back-button:active, .edit-button:active, .delete-button:active {
+  background: #a67c52;
+  transform: translateY(1px);
+}
 
 /* ==== Модалка ==== */
 .login-backdrop {
@@ -363,7 +372,6 @@ html, body {
   font-size: 14px;
   width: 100%;
 }
-
 .custom-select__control {
   background: #f5f0e6;
   border: 1px solid #8b5e3c;
@@ -376,13 +384,7 @@ html, body {
   color: #2e1b0e;
   box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
-
-.custom-select__arrow {
-  margin-left: 8px;
-  font-size: 12px;
-  color: #5c3b26;
-}
-
+.custom-select__arrow { margin-left: 8px; font-size: 12px; color: #5c3b26; }
 .custom-select__menu {
   position: absolute;
   top: calc(100% + 4px);
@@ -396,18 +398,64 @@ html, body {
   max-height: 220px;
   overflow-y: auto;
 }
-
 .custom-select__option {
   padding: 8px 12px;
   cursor: pointer;
   transition: background 0.15s;
 }
+.custom-select__option:hover { background: #d2b48c; }
+.custom-select__option.selected { background: #c19a6b; font-weight: bold; }
 
-.custom-select__option:hover {
-  background: #d2b48c;
+/* ==== Левая страница: описание конфликта ==== */
+.left-content {
+  flex: 1;
+  min-height: 0;
+  margin: 8px 0 12px;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
 }
 
-.custom-select__option.selected {
-  background: #c19a6b;
+/* Режим просмотра */
+.conflict-text {
+  flex: 1;
+  white-space: pre-wrap;
+  line-height: 1.4;
+  font-size: 15px;
+  text-align: center;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.conflict-text::-webkit-scrollbar { display: none; }
+
+/* Редактор (админ) */
+.conflict-editor {
+  flex: 1;
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #8b5e3c;
+  border-radius: 6px;
+  background: #f5f0e6;
+  overflow-y: auto;
+}
+
+/* Кнопки */
+.left-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: auto;
+}
+
+/* Сообщение о сохранении */
+.save-message {
+  margin: 8px 0;
+  text-align: center;
+  font-size: 14px;
   font-weight: bold;
+  color: green;
 }
