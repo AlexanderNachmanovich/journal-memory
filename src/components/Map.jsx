@@ -1,7 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import LoginModal from "./LoginModal";
-
-// ✅ импортируем картинку через Vite
 import bg from "../assets/images/bg.png";
 
 const REGIONS = [
@@ -17,9 +15,8 @@ const REGIONS = [
 
 export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) {
   const [loginOpen, setLoginOpen] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const timerRef = useRef(null);
-  const intervalRef = useRef(null);
+  const [clickCount, setClickCount] = useState(0);
+  const [showHint, setShowHint] = useState(false);
 
   const doLogin = async (pwd) => {
     const res = await onAdminLogin?.(pwd);
@@ -37,33 +34,32 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
     onAdminLogout?.();
   };
 
-  // 👉 скрытая кнопка выхода
-  const handleExitDown = () => {
-    setProgress(0);
-    const duration = 7000; // 7 секунд
-    const start = Date.now();
+  // 👉 обработка невидимой кнопки выхода
+  const handleSecretClick = () => {
+    setClickCount((prev) => {
+      const newCount = prev + 1;
+      setShowHint(true);
 
-    intervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - start;
-      const p = Math.min(elapsed / duration, 1);
-      setProgress(p);
-      if (p >= 1) {
-        clearInterval(intervalRef.current);
-        window.api.appQuit();
+      if (newCount >= 7) {
+        setClickCount(0);
+        setShowHint(false);
+        window.api.appQuit(); // выходим
       }
-    }, 100);
 
-    timerRef.current = setTimeout(() => {
-      clearInterval(intervalRef.current);
-      window.api.appQuit();
-    }, duration);
+      return newCount;
+    });
   };
 
-  const handleExitUp = () => {
-    clearTimeout(timerRef.current);
-    clearInterval(intervalRef.current);
-    setProgress(0);
-  };
+  // 👉 сброс счётчика, если пауза дольше 4 сек
+  useEffect(() => {
+    if (clickCount > 0) {
+      const timer = setTimeout(() => {
+        setClickCount(0);
+        setShowHint(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [clickCount]);
 
   return (
       <div className="map">
@@ -89,7 +85,6 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
                 className="admin-fab"
                 title="Режим администратора"
                 onClick={openLogin}
-                onMouseDown={openLogin}
                 style={{
                   zIndex: 2147483647,
                   pointerEvents: "auto",
@@ -103,7 +98,6 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
                 className="admin-fab"
                 title="Выйти из админ-режима"
                 onClick={logout}
-                onMouseDown={logout}
                 style={{
                   zIndex: 2147483647,
                   pointerEvents: "auto",
@@ -121,7 +115,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
             />
         )}
 
-        {/* 🔴 Скрытая кнопка выхода */}
+        {/* 🔴 Невидимая зона выхода */}
         <div
             style={{
               position: "fixed",
@@ -133,36 +127,26 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
               zIndex: 99999,
               cursor: "pointer",
             }}
-            onMouseDown={handleExitDown}
-            onMouseUp={handleExitUp}
-            onMouseLeave={handleExitUp}
+            onClick={handleSecretClick}
         />
 
-        {/* 🔵 Индикатор круга */}
-        {progress > 0 && (
-            <svg
+        {/* 🔵 Индикатор количества кликов */}
+        {showHint && (
+            <div
                 style={{
                   position: "fixed",
-                  bottom: 10,
+                  bottom: 80,
                   right: 10,
-                  width: 60,
-                  height: 60,
+                  background: "rgba(0,0,0,0.6)",
+                  color: "#fff",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
                   zIndex: 100000,
-                  pointerEvents: "none",
                 }}
             >
-              <circle
-                  cx="30"
-                  cy="30"
-                  r="28"
-                  stroke="red"
-                  strokeWidth="4"
-                  fill="transparent"
-                  strokeDasharray={2 * Math.PI * 28}
-                  strokeDashoffset={2 * Math.PI * 28 * (1 - progress)}
-                  style={{ transition: "stroke-dashoffset 0.1s linear" }}
-              />
-            </svg>
+              🔑 {clickCount}/7
+            </div>
         )}
       </div>
   );

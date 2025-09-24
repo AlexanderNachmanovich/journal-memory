@@ -25,6 +25,34 @@
   --right-nudge: 15.5%;
 }
 
+/* ==== СТИЛЬ СКРОЛЛОВ ==== */
+* {
+  scrollbar-width: thin;                                   /* Firefox */
+  scrollbar-color: rgba(139,94,60,0.6) rgba(245,240,230,0.6);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(245,240,230,0.6);  /* светлый фон трека */
+  border: 1px solid rgba(139,94,60,0.4);
+  border-radius: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(193,154,107,0.7);  /* ползунок */
+  border: 1px solid rgba(139,94,60,0.6);
+  border-radius: 6px;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(166,124,82,0.85);  /* чуть ярче при наведении */
+}
+
 html, body {
   font-family: var(--font-ui);
   font-weight: 400;
@@ -32,7 +60,7 @@ html, body {
   padding: 0;
   height: 100%;
   background: #000;
-  overflow: hidden; /* 🔑 dropdown работает */
+  /* убрано overflow: hidden; чтобы скроллбары работали */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -51,7 +79,7 @@ html, body {
   justify-content: center;
   align-items: center;
   background: #000;
-  overflow: hidden;
+  overflow: hidden; /* карта не скроллится */
 }
 
 .map-image {
@@ -126,7 +154,7 @@ html, body {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  overflow: hidden;
+  overflow: hidden; /* фон не скроллится */
   z-index: 0;
   pointer-events: none;
 }
@@ -157,13 +185,9 @@ html, body {
   left: var(--left-nudge);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;        /* ✅ страница прокручивается */
+  overflow-y: auto;
   min-height: 0;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.left-page::-webkit-scrollbar { display: none; }
-
 .left-page h1 {
   text-align: center;
   margin: 0 0 12px;
@@ -184,10 +208,7 @@ html, body {
   gap: 12px;
   flex: 1;
   overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.person-form::-webkit-scrollbar { display: none; }
 
 .person-form input,
 .person-form select,
@@ -248,10 +269,7 @@ html, body {
   min-height: 0;
   width: 100%;
   overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.people-scroll::-webkit-scrollbar { display: none; }
 
 /* ==== Деталь человека ==== */
 .person-details {
@@ -278,11 +296,8 @@ html, body {
   max-width: 90%;
   overflow-wrap: anywhere;
   word-break: break-word;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
   white-space: pre-wrap;
 }
-.biography-box::-webkit-scrollbar { display: none; }
 
 /* ==== Кнопки ==== */
 .back-button, .edit-button, .delete-button {
@@ -424,10 +439,7 @@ html, body {
   font-size: 15px;
   text-align: center;
   overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
-.conflict-text::-webkit-scrollbar { display: none; }
 
 /* Редактор (админ) */
 .conflict-editor {

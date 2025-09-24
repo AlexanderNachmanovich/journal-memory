@@ -30,7 +30,7 @@ export default function PeopleList({
         <div className="book-wrapper">
           {/* Левая страница */}
           <div className="book-page left-page">
-            <h1>КНИГА ПАМЯТИ</h1>
+            <h1>Общий список</h1>
 
             <button className="back-button" onClick={onBack}>
               ← Выход на карту мира
@@ -60,7 +60,9 @@ export default function PeopleList({
 
           {/* Правая страница */}
           <div className="book-page right-page">
-            <h2 style={{ marginTop: 0, marginBottom: 16 }}>Общий список</h2>
+            <h2 style={{ marginTop: 0, marginBottom: 16 }}>
+              Книга памяти. Все регионы
+            </h2>
 
             <div className="people-scroll">
               <table className="people-table">

@@ -58,7 +58,7 @@ export default function RegionPeopleList({
         <div className="book-wrapper">
           {/* Левая страница */}
           <div className="book-page left-page scrollable">
-            <h1>КНИГА ПАМЯТИ</h1>
+            <h1>{region}</h1>
 
             {loading ? (
                 <p>Загрузка…</p>
@@ -111,7 +111,9 @@ export default function RegionPeopleList({
 
           {/* Правая страница */}
           <div className="book-page right-page">
-            <h2 style={{ marginTop: 0, marginBottom: 16 }}>Регион: {region}</h2>
+            <h2 style={{ marginTop: 0, marginBottom: 16 }}>
+              Книга памяти. Регион: {region}
+            </h2>
 
             <div className="people-scroll">
               <table className="people-table">
@@ -136,9 +138,7 @@ export default function RegionPeopleList({
                         <tr key={p.id} onClick={() => onSelect && onSelect(p)}>
                           <td>{p.name}</td>
                           <td>
-                            {p.birthDate
-                                ? String(p.birthDate).slice(0, 4)
-                                : ""}
+                            {p.birthDate ? String(p.birthDate).slice(0, 4) : ""}
                           </td>
                         </tr>
                     ))
