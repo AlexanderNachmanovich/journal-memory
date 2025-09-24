@@ -39,6 +39,7 @@ function ensureConfig() {
 }
 
 let CONFIG = null;
+let mainWindow = null;
 const adminSessions = new Set();
 
 function isAdminEvent(event) {
@@ -46,12 +47,15 @@ function isAdminEvent(event) {
 }
 
 // ----------------------------------------------------------
-
+// Создание окна
 function createWindow() {
-  const win = new BrowserWindow({
-    fullscreen: true,        // сразу во весь экран
-    // kiosk: true,             // киоск-режим (нельзя случайно выйти)
-    // autoHideMenuBar: true,   // скрыть верхнее меню
+  mainWindow = new BrowserWindow({
+    fullscreen: true,
+    kiosk: true,
+    autoHideMenuBar: true,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
     minWidth: 1024,
     minHeight: 700,
     show: false,
@@ -64,19 +68,18 @@ function createWindow() {
     },
   });
 
-  win.once('ready-to-show', () => win.show());
+  mainWindow.once('ready-to-show', () => mainWindow.show());
 
   if (isDev) {
-    win.loadURL('http://localhost:5173');
+    mainWindow.loadURL('http://localhost:5173');
   } else {
-    win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+    mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
   }
 
-  win.webContents.on('destroyed', () => {
-    adminSessions.delete(win.webContents.id);
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 }
-
 
 // 📂 папка для фото
 const photosDir = path.join(app.getPath('userData'), 'photos');
@@ -102,14 +105,32 @@ ipcMain.handle('auth-login', (event, { password }) => {
   const ok = password === CONFIG.adminPassword;
   if (ok) {
     adminSessions.add(event.sender.id);
-    return { ok: true };
+
+    if (mainWindow) {
+      mainWindow.setKiosk(false);
+      mainWindow.setFullScreen(false);
+      mainWindow.setResizable(true);
+      mainWindow.setMinimizable(true);
+      mainWindow.setMaximizable(true);
+    }
+
+    return { ok: true, isAdmin: true };
   }
   return { ok: false, error: 'BAD_PASSWORD' };
 });
 
 ipcMain.handle('auth-logout', (event) => {
   adminSessions.delete(event.sender.id);
-  return { ok: true };
+
+  if (mainWindow) {
+    mainWindow.setKiosk(true);
+    mainWindow.setFullScreen(true);
+    mainWindow.setResizable(false);
+    mainWindow.setMinimizable(false);
+    mainWindow.setMaximizable(false);
+  }
+
+  return { ok: true, isAdmin: false };
 });
 
 ipcMain.handle('auth-change-password', (event, { oldPassword, newPassword }) => {
@@ -193,7 +214,6 @@ ipcMain.handle('app-quit', () => {
   app.quit();
 });
 
-
 // =======================
 // App lifecycle
 // =======================
@@ -202,10 +222,9 @@ if (!gotLock) {
   app.quit();
 } else {
   app.on('second-instance', () => {
-    const wins = BrowserWindow.getAllWindows();
-    if (wins.length) {
-      if (wins[0].isMinimized()) wins[0].restore();
-      wins[0].focus();
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.focus();
     }
   });
 
@@ -218,7 +237,7 @@ if (!gotLock) {
       callback({ path: filePath });
     });
 
-    createWindow();
+    createWindow(); // по умолчанию kiosk
   });
 
   app.on('window-all-closed', () => {
