@@ -2,7 +2,7 @@
 const { app, BrowserWindow, ipcMain, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { db, getConflictText, saveConflictText } = require('./db');
+const { db, getConflictText, saveConflictText, photosDir } = require('./db');
 
 
 const isDev = !app.isPackaged;
@@ -80,12 +80,6 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-}
-
-// 📂 папка для фото
-const photosDir = path.join(app.getPath('userData'), 'photos');
-if (!fs.existsSync(photosDir)) {
-  fs.mkdirSync(photosDir, { recursive: true });
 }
 
 // =======================
