@@ -12,7 +12,10 @@ export default function RegionPeopleList({
                                            onAdminLogout,
                                          }) {
   const regionPeople = useMemo(
-      () => (people || []).filter((p) => p.region === region),
+      () =>
+          (people || [])
+              .filter((p) => p.region === region)
+              .sort((a, b) => (a.name || "").localeCompare(b.name || "", "ru")),
       [people, region]
   );
 

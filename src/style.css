@@ -280,12 +280,16 @@ html, body {
 .person-details > * { max-width: 100%; }
 
 .person-photo {
-  width: 220px;
+  max-height: 33%;       /* максимум треть высоты контейнера */
+  height: auto;          /* сохраняем пропорции */
+  width: auto;           /* ширина подстраивается */
   margin-bottom: 20px;
   border: 3px solid #3e2f1c;
   filter: sepia(100%) contrast(90%) brightness(95%);
   box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+  object-fit: contain;   /* чтобы фото не растягивалось */
 }
+
 
 .biography-box {
   margin-top: 15px;
