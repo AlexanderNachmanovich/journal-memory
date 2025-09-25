@@ -19,10 +19,10 @@
   --font-ui: "IBMPlexMono", Menlo, Consolas, "Liberation Mono", monospace;
 
   /* Разворот книги */
-  --page-w: 36%;
-  --seam-gap: 3.6%;
-  --left-nudge: 10.5%;
-  --right-nudge: 15.5%;
+  --page-w: 40%;
+  --seam-gap: 5%;
+  --left-nudge: 8.5%;
+  --right-nudge: 12.8%;
 }
 
 /* ==== СТИЛЬ СКРОЛЛОВ ==== */
@@ -293,7 +293,7 @@ html, body {
   overflow-y: auto;
   text-align: left;
   line-height: 1.5;
-  max-width: 90%;
+  /*max-width: 90%;*/
   overflow-wrap: anywhere;
   word-break: break-word;
   white-space: pre-wrap;

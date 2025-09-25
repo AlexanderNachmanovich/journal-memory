@@ -52,7 +52,7 @@ function isAdminEvent(event) {
 function createWindow() {
   mainWindow = new BrowserWindow({
     fullscreen: true,
-    kiosk: true,
+    // kiosk: true,
     autoHideMenuBar: true,
     resizable: false,
     minimizable: false,
