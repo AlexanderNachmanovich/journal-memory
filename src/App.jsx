@@ -35,6 +35,14 @@ export default function App() {
     }
   };
 
+  const handleLogout = async () => {
+    await logout();
+    setIsAdding(false);
+    setEditingPerson(null);
+    setSelectedPerson(null);
+    // ❗ selectedRegion остаётся — пользователь остаётся в том же регионе
+  };
+
   if (loading) return <p>Загрузка...</p>;
 
   return (
@@ -45,11 +53,11 @@ export default function App() {
                 onSelect={setSelectedRegion}
                 isAdmin={isAdmin}
                 onAdminLogin={login}
-                onAdminLogout={logout}
+                onAdminLogout={handleLogout}
             />
         )}
 
-        {/* --- Список людей выбранного региона (разворот книги) --- */}
+        {/* --- Список людей выбранного региона --- */}
         {selectedRegion && selectedRegion !== "__ALL__" && !selectedPerson && !isAdding && (
             <RegionPeopleList
                 region={selectedRegion}
@@ -59,11 +67,11 @@ export default function App() {
                 onShowAll={() => setSelectedRegion("__ALL__")}
                 onAdd={isAdmin ? () => { setIsAdding(true); setEditingPerson(null); } : undefined}
                 isAdmin={isAdmin}
-                onAdminLogout={logout}
+                onAdminLogout={handleLogout}
             />
         )}
 
-        {/* --- Общий список (разворот книги) --- */}
+        {/* --- Общий список --- */}
         {selectedRegion === "__ALL__" && !selectedPerson && !isAdding && (
             <PeopleList
                 people={people}
@@ -71,11 +79,11 @@ export default function App() {
                 onBack={() => setSelectedRegion(null)}
                 onAdd={isAdmin ? () => { setIsAdding(true); setEditingPerson(null); } : undefined}
                 isAdmin={isAdmin}
-                onAdminLogout={logout}
+                onAdminLogout={handleLogout}
             />
         )}
 
-        {/* --- Форма добавления/редактирования (разворот книги) --- */}
+        {/* --- Форма добавления/редактирования --- */}
         {isAdding && (
             <PersonForm
                 initialData={
@@ -95,11 +103,11 @@ export default function App() {
                   setSelectedRegion(null);
                 }}
                 isAdmin={isAdmin}
-                onAdminLogout={logout}
+                onAdminLogout={handleLogout}
             />
         )}
 
-        {/* --- Карточка человека (разворот книги) --- */}
+        {/* --- Карточка человека --- */}
         {selectedPerson && !isAdding && (
             <PersonCard
                 person={selectedPerson}
@@ -119,7 +127,7 @@ export default function App() {
                   setIsAdding(true);
                 }}
                 isAdmin={isAdmin}
-                onAdminLogout={logout}
+                onAdminLogout={handleLogout}
             />
         )}
       </div>

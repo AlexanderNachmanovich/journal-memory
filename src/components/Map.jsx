@@ -70,7 +70,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
           {REGIONS.map((r) => (
               <button
                   key={r}
-                  className="region-button"
+                  className={`region-button ${r === "Нагорный Карабах" ? "region-karabakh" : ""}`}
                   onClick={() => onSelect(r)}
                   type="button"
               >

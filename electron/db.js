@@ -27,7 +27,7 @@ if (!fs.existsSync(targetDb)) {
         birthDate TEXT,      -- формат YYYY-MM-DD
         region TEXT,
         biography TEXT,
-        photoPath TEXT
+        photoPath TEXT       -- основное фото
       )
     `).run();
 
@@ -35,6 +35,15 @@ if (!fs.existsSync(targetDb)) {
       CREATE TABLE IF NOT EXISTS conflicts (
         region TEXT PRIMARY KEY,
         text   TEXT
+      )
+    `).run();
+
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS person_photos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        personId INTEGER NOT NULL,
+        filePath TEXT NOT NULL,
+        FOREIGN KEY (personId) REFERENCES persons(id) ON DELETE CASCADE
       )
     `).run();
 
@@ -89,25 +98,51 @@ db.prepare(`
   )
 `).run();
 
+// 4) Таблица person_photos (на случай, если базы уже существовала без неё)
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS person_photos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    personId INTEGER NOT NULL,
+    filePath TEXT NOT NULL,
+    FOREIGN KEY (personId) REFERENCES persons(id) ON DELETE CASCADE
+  )
+`).run();
+
 // Методы для работы с текстами конфликтов
 function getConflictText(region) {
-  const row = db.prepare(
-      `SELECT text FROM conflicts WHERE region = ?`
-  ).get(region);
+  const row = db.prepare(`SELECT text FROM conflicts WHERE region = ?`).get(region);
   return row ? row.text : "";
 }
 
 function saveConflictText(region, text) {
-  db.prepare(
-      `INSERT INTO conflicts (region, text)
-     VALUES (?, ?)
-     ON CONFLICT(region) DO UPDATE SET text = excluded.text`
-  ).run(region, text);
+  db.prepare(`
+    INSERT INTO conflicts (region, text)
+    VALUES (?, ?)
+    ON CONFLICT(region) DO UPDATE SET text = excluded.text
+  `).run(region, text);
+}
+
+// Методы для работы с дополнительными фото
+function getPersonPhotos(personId) {
+  return db.prepare(`SELECT * FROM person_photos WHERE personId = ?`).all(personId);
+}
+
+function addPersonPhoto(personId, filePath) {
+  return db.prepare(`
+    INSERT INTO person_photos (personId, filePath) VALUES (?, ?)
+  `).run(personId, filePath).lastInsertRowid;
+}
+
+function deletePersonPhoto(photoId) {
+  return db.prepare(`DELETE FROM person_photos WHERE id = ?`).run(photoId);
 }
 
 module.exports = {
   db,
   getConflictText,
   saveConflictText,
-  photosDir, // экспортируем папку для фото, чтобы использовать в preload.js
+  photosDir,
+  getPersonPhotos,
+  addPersonPhoto,
+  deletePersonPhoto
 };

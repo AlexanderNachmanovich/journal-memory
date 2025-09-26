@@ -2,8 +2,15 @@
 const { app, BrowserWindow, ipcMain, protocol } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { db, getConflictText, saveConflictText, photosDir } = require('./db');
-
+const {
+  db,
+  getConflictText,
+  saveConflictText,
+  photosDir,
+  getPersonPhotos,
+  addPersonPhoto,
+  deletePersonPhoto
+} = require('./db');
 
 const isDev = !app.isPackaged;
 
@@ -52,7 +59,7 @@ function isAdminEvent(event) {
 function createWindow() {
   mainWindow = new BrowserWindow({
     fullscreen: true,
-    kiosk: true,
+    // kiosk: true,
     autoHideMenuBar: true,
     resizable: false,
     minimizable: false,
@@ -183,7 +190,7 @@ ipcMain.handle('delete-person', (event, id) => {
   return db.prepare('DELETE FROM persons WHERE id = ?').run(id);
 });
 
-// ---------- SAVE/REPLACE PHOTO ----------
+// ---------- SAVE/REPLACE MAIN PHOTO ----------
 ipcMain.handle('save-photo', (event, { tempPath, fileName }) => {
   if (!isAdminEvent(event)) throw new Error('Not authorized');
   const destPath = path.join(photosDir, fileName);
@@ -205,8 +212,23 @@ ipcMain.handle('replace-photo', (event, { tempPath, fileName, oldFileName }) => 
   return fileName;
 });
 
-ipcMain.handle('app-quit', () => {
-  app.quit();
+// ---------- EXTRA PHOTOS ----------
+ipcMain.handle('get-person-photos', (event, personId) => {
+  return getPersonPhotos(personId);
+});
+
+ipcMain.handle('add-person-photo', (event, { personId, tempPath, fileName }) => {
+  if (!isAdminEvent(event)) throw new Error('Not authorized');
+  const destPath = path.join(photosDir, fileName);
+  fs.copyFileSync(tempPath, destPath);
+  addPersonPhoto(personId, fileName);
+  return fileName;
+});
+
+ipcMain.handle('delete-person-photo', (event, photoId) => {
+  if (!isAdminEvent(event)) throw new Error('Not authorized');
+  deletePersonPhoto(photoId);
+  return true;
 });
 
 // ---------- CONFLICTS ----------
@@ -219,7 +241,6 @@ ipcMain.handle('save-conflict-text', (event, { region, text }) => {
   saveConflictText(region, text);
   return true;
 });
-
 
 // =======================
 // App lifecycle
@@ -255,3 +276,9 @@ if (!gotLock) {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 }
+
+// ---------- APP QUIT ----------
+ipcMain.handle("app-quit", () => {
+  app.quit();
+});
+

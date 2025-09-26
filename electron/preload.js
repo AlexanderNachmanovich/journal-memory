@@ -13,9 +13,14 @@ contextBridge.exposeInMainWorld("api", {
   updatePerson: (person) => ipcRenderer.invoke("update-person", person),
   deletePerson: (id) => ipcRenderer.invoke("delete-person", id),
 
-  // PHOTOS
+  // MAIN PHOTO
   savePhoto: (file) => ipcRenderer.invoke("save-photo", file),
   replacePhoto: (file) => ipcRenderer.invoke("replace-photo", file),
+
+  // EXTRA PHOTOS
+  getPersonPhotos: (personId) => ipcRenderer.invoke("get-person-photos", personId),
+  addPersonPhoto: (data) => ipcRenderer.invoke("add-person-photo", data),
+  deletePersonPhoto: (photoId) => ipcRenderer.invoke("delete-person-photo", photoId),
 
   // CONFLICTS
   getConflictText: (region) => ipcRenderer.invoke("get-conflict-text", region),

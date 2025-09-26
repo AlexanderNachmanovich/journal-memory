@@ -8,8 +8,23 @@ export function useData() {
   const loadData = async () => {
     try {
       if (window.api) {
+        // получаем всех людей
         const persons = await window.api.getPersons();
-        setData(persons);
+
+        // для каждого человека подтягиваем его дополнительные фото
+        const withPhotos = await Promise.all(
+            persons.map(async (p) => {
+              try {
+                const extra = await window.api.getPersonPhotos(p.id);
+                return { ...p, extraPhotos: extra }; // extra = [{id, personId, filePath}]
+              } catch (e) {
+                console.warn("Не удалось загрузить фото для", p.id, e);
+                return { ...p, extraPhotos: [] };
+              }
+            })
+        );
+
+        setData(withPhotos);
       } else {
         console.warn("⚠️ window.api не доступен — preload.js не подхватился");
       }
@@ -37,12 +52,18 @@ export function useData() {
 // ====================
 
 export async function getConflictText(region) {
-  try { return window.api ? await window.api.getConflictText(region) : ""; }
-  catch (err) { console.error("Ошибка getConflictText:", err); return ""; }
+  try {
+    return window.api ? await window.api.getConflictText(region) : "";
+  } catch (err) {
+    console.error("Ошибка getConflictText:", err);
+    return "";
+  }
 }
 
 export async function saveConflictText(region, text) {
-  try { if (window.api) await window.api.saveConflictText(region, text); }
-  catch (err) { console.error("Ошибка saveConflictText:", err); }
+  try {
+    if (window.api) await window.api.saveConflictText(region, text);
+  } catch (err) {
+    console.error("Ошибка saveConflictText:", err);
+  }
 }
-

@@ -98,7 +98,8 @@ html, body {
   bottom: 10%;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+  row-gap: 30px;
+  column-gap: 60px;
   justify-items: center;
   padding: 0 40px;
   z-index: 10;
@@ -116,6 +117,12 @@ html, body {
   transition: all 0.2s ease-in-out;
   box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
 }
+
+.region-karabakh {
+  position: relative;
+  left: 10%;   /* подвинет кнопку правее */
+}
+
 .region-button:hover { background: #d2b48c; transform: translateY(-2px); }
 .region-button:active { background: #a67c52; transform: translateY(1px); }
 
@@ -176,9 +183,15 @@ html, body {
   padding: 2% 2.5%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;   /* 🔑 чтобы всё прокручивалось */
+  overflow-x: hidden; /* но не вылазило по ширине */
   z-index: 2;
   pointer-events: auto;
+}
+
+.book-page.right-page {
+  overflow-y: auto;      /* ✅ тоже пусть скроллится */
+  min-height: 0;         /* чтобы flex не ломался */
 }
 
 .left-page {
@@ -205,10 +218,21 @@ html, body {
 .person-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;              /* 🔑 больше расстояние между элементами */
   flex: 1;
   overflow-y: auto;
+  padding-bottom: 60px;   /* 🔑 запас снизу, чтобы кнопки/файлы не обрезались */
 }
+
+.person-form input[type="file"] {
+  padding: 6px;
+  background: #f5f0e6;
+  border: 1px solid #8b5e3c;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;        /* 🔑 не сжимается */
+}
+
 
 .person-form input,
 .person-form select,
@@ -441,7 +465,7 @@ html, body {
   white-space: pre-wrap;
   line-height: 1.4;
   font-size: 15px;
-  text-align: center;
+  text-align: left;
   overflow-y: auto;
 }
 
@@ -475,3 +499,140 @@ html, body {
   font-weight: bold;
   color: green;
 }
+
+.extra-photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.extra-photo-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.extra-photo {
+  max-height: 120px;
+  border: 2px solid #3e2f1c;
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  object-fit: contain;
+}
+
+.delete-extra-photo {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: rgba(200,0,0,0.85);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.delete-extra-photo:hover {
+  background: rgba(255,0,0,1);
+}
+
+/* ==== Просмотр фото (попап) ==== */
+.photo-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  pointer-events: auto !important;
+}
+
+.photo-viewer,
+.photo-viewer * {
+  pointer-events: auto;
+}
+
+.photo-viewer {
+  position: relative;
+  max-width: 70%;
+  max-height: 70%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-viewer-img {
+  max-width: 100%;
+  max-height: 100%;
+  border: 4px solid #3e2f1c;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  object-fit: contain;
+  background: #fff;
+  z-index: 10000;
+}
+
+/* Кнопка закрытия */
+.close-btn {
+  position: fixed;
+  top: 5%;
+  right: 5%;
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #2e1b0e;
+  cursor: pointer;
+  box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  transition: all 0.2s ease-in-out;
+}
+.close-btn:hover {
+  background: #d2b48c;
+  transform: scale(1.1);
+}
+.close-btn:active {
+  background: #a67c52;
+  transform: scale(0.95);
+}
+
+/* Кнопки навигации */
+.nav-btn {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #c19a6b;
+  border: 2px solid #8b5e3c;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  font-size: 26px;
+  font-weight: bold;
+  color: #2e1b0e;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10001;
+  transition: all 0.2s ease-in-out;
+}
+.nav-btn:hover {
+  background: #d2b48c;
+  transform: translateY(-50%) scale(1.1);
+}
+.nav-btn:active {
+  background: #a67c52;
+  transform: translateY(-50%) scale(0.95);
+}
+
+.nav-btn.prev {
+  left: 10%;
+}
+.nav-btn.next {
+  right: 10%;
+}
+
+

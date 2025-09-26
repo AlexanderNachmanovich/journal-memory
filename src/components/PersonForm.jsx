@@ -3,7 +3,6 @@ import { REGIONS } from "../data/regions";
 import bg2 from "../assets/images/bg2.png";   // фон книги
 import CustomSelect from "./CustomSelect";
 
-// helpers
 function splitFullName(full) {
   if (!full || typeof full !== "string") return { lastName: "", firstName: "", middleName: "" };
   const parts = full.replace(/\s+/g, " ").trim().split(" ");
@@ -41,9 +40,9 @@ export default function PersonForm({
     biography: "",
   });
   const [previewURL, setPreviewURL] = useState(null);
+  const [extraPhotos, setExtraPhotos] = useState([]);
 
   useEffect(() => {
-    // фон книги через CSS-переменную
     document.documentElement.style.setProperty("--book-bg", `url(${bg2})`);
   }, []);
 
@@ -51,7 +50,6 @@ export default function PersonForm({
     if (!initialData) return;
     const patched = { ...initialData };
 
-    // нормализуем регион (сравнение без регистра и лишних пробелов)
     if (patched.region) {
       const match = REGIONS.find(
           (r) => r.toLowerCase().trim() === patched.region.toLowerCase().trim()
@@ -73,7 +71,12 @@ export default function PersonForm({
     }
 
     setFormData((prev) => ({ ...prev, ...patched }));
-    setPreviewURL(patched.photoPath ? `/photos/${patched.photoPath}` : null);
+    setPreviewURL(patched.photoPath ? `photos://${patched.photoPath}` : null);
+
+
+    if (patched.id && window.api) {
+      window.api.getPersonPhotos(patched.id).then(setExtraPhotos).catch(() => setExtraPhotos([]));
+    }
   }, [initialData]);
 
   const handleChange = (e) => {
@@ -103,12 +106,36 @@ export default function PersonForm({
 
     setFormData((prev) => ({ ...prev, photoPath: savedFileName }));
     setPreviewURL(`photos://${savedFileName}`);
+
+  };
+
+  const handleExtraPhotosChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length || !formData.id) return;
+
+    for (const file of files) {
+      const uniqueName = `${Date.now()}-${file.name}`;
+      await window.api.addPersonPhoto({
+        personId: formData.id,
+        tempPath: file.path,
+        fileName: uniqueName,
+      });
+    }
+
+    const updated = await window.api.getPersonPhotos(formData.id);
+    setExtraPhotos(updated);
+  };
+
+  const handleDeleteExtraPhoto = async (photoId) => {
+    if (!formData.id) return;
+    await window.api.deletePersonPhoto(photoId);
+    const updated = await window.api.getPersonPhotos(formData.id);
+    setExtraPhotos(updated);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // нормализуем регион перед сохранением
     let region = formData.region?.trim() || "";
     const match = REGIONS.find((r) => r.toLowerCase() === region.toLowerCase());
     region = match || region;
@@ -128,7 +155,8 @@ export default function PersonForm({
       if (formData.id) {
         await window.api.updatePerson(personData);
       } else {
-        await window.api.addPerson(personData);
+        const newId = await window.api.addPerson(personData);
+        setFormData((prev) => ({ ...prev, id: newId }));
       }
       onSave && onSave();
     } catch (err) {
@@ -163,6 +191,7 @@ export default function PersonForm({
           <div className="book-page right-page">
             <form className="person-form" onSubmit={handleSubmit}>
               {previewURL && <img src={previewURL} alt="Фото" className="person-photo" />}
+              <label>Основное фото:</label>
               <input type="file" accept="image/*" onChange={handlePhotoChange} />
 
               <input
@@ -197,7 +226,7 @@ export default function PersonForm({
               />
 
               <CustomSelect
-                  options={REGIONS.map(r => ({ value: r, label: r }))}
+                  options={REGIONS.map((r) => ({ value: r, label: r }))}
                   value={formData.region}
                   onChange={(val) => setFormData({ ...formData, region: val })}
                   placeholder="Выберите регион"
@@ -209,6 +238,32 @@ export default function PersonForm({
                   value={formData.biography || ""}
                   onChange={handleChange}
               />
+
+              {/* Дополнительные фото */}
+              {formData.id && (
+                  <>
+                    <label>Дополнительные фото:</label>
+                    <input type="file" accept="image/*" multiple onChange={handleExtraPhotosChange} />
+                    <div className="extra-photos">
+                      {extraPhotos.map((p) => (
+                          <div key={p.id} className="extra-photo-wrapper">
+                            <img
+                                src={`photos://${p.filePath}`}
+                                alt="доп фото"
+                                className="extra-photo"
+                            />
+                            <button
+                                type="button"
+                                className="delete-extra-photo"
+                                onClick={() => handleDeleteExtraPhoto(p.id)}
+                            >
+                              ✖
+                            </button>
+                          </div>
+                      ))}
+                    </div>
+                  </>
+              )}
 
               <div className="form-buttons">
                 <button type="submit">💾 Сохранить</button>
