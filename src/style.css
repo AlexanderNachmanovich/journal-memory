@@ -105,28 +105,40 @@ html, body {
   transform: translate(-50%, -50%);
   background: #c19a6b;
   border: 2px solid #8b5e3c;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-size: 16px;
+  border-radius: 0.5vw; /* скругление тоже адаптивное */
+
+  /* 🔑 размеры зависят от ширины окна */
+  font-size: 1vw;         /* примерно 19px при ширине 1920px */
+  padding: 0.6vw 1.2vw;   /* внутренние отступы в процентах */
+
   font-weight: bold;
   color: #2e1b0e;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
-  box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  box-shadow: 0.2vw 0.2vw 0.4vw rgba(0,0,0,0.4);
+  white-space: nowrap; /* чтобы текст не переносился */
+  min-width: 6vw;      /* 🔑 чтобы короткие не были крошечными */
 }
 
-/* координаты — подгони один раз под свою карту */
+/* координаты — остаются как есть */
 .btn-angola      { top: 81%; left: 31%; }
 .btn-afghanistan { top: 81%; left: 43%; }
-.btn-karabakh    { top: 81%; left: 59%; }
+.btn-karabakh    { top: 81%; left: 57.5%; }
 .btn-syria       { top: 81%; left: 69%; }
 .btn-tajikistan  { top: 87.5%; left: 31%; }
 .btn-chechnya    { top: 87.5%; left: 44%; }
 .btn-ethiopia    { top: 87.5%; left: 56%; }
 .btn-svo         { top: 87.5%; left: 69%; }
 
-.region-button:hover { background: #d2b48c; transform: translate(-50%, -50%) scale(1.05); }
-.region-button:active { background: #a67c52; transform: translate(-50%, -50%) scale(0.95); }
+.region-button:hover {
+  background: #d2b48c;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+.region-button:active {
+  background: #a67c52;
+  transform: translate(-50%, -50%) scale(0.95);
+}
+
 
 
 /* ==== FAB администратора ==== */
