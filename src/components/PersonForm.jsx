@@ -41,6 +41,7 @@ export default function PersonForm({
   });
   const [previewURL, setPreviewURL] = useState(null);
   const [extraPhotos, setExtraPhotos] = useState([]);
+  const [pendingExtraPhotos, setPendingExtraPhotos] = useState([]); // новые фото до сохранения id
 
   useEffect(() => {
     document.documentElement.style.setProperty("--book-bg", `url(${bg2})`);
@@ -72,7 +73,6 @@ export default function PersonForm({
 
     setFormData((prev) => ({ ...prev, ...patched }));
     setPreviewURL(patched.photoPath ? `photos://${patched.photoPath}` : null);
-
 
     if (patched.id && window.api) {
       window.api.getPersonPhotos(patched.id).then(setExtraPhotos).catch(() => setExtraPhotos([]));
@@ -106,12 +106,17 @@ export default function PersonForm({
 
     setFormData((prev) => ({ ...prev, photoPath: savedFileName }));
     setPreviewURL(`photos://${savedFileName}`);
-
   };
 
   const handleExtraPhotosChange = async (e) => {
     const files = Array.from(e.target.files || []);
-    if (!files.length || !formData.id) return;
+    if (!files.length) return;
+
+    if (!formData.id) {
+      // если id ещё нет — копим фото во временный массив
+      setPendingExtraPhotos((prev) => [...prev, ...files]);
+      return;
+    }
 
     for (const file of files) {
       const uniqueName = `${Date.now()}-${file.name}`;
@@ -152,11 +157,27 @@ export default function PersonForm({
     };
 
     try {
+      let newId = formData.id;
       if (formData.id) {
         await window.api.updatePerson(personData);
       } else {
-        const newId = await window.api.addPerson(personData);
+        newId = await window.api.addPerson(personData);
         setFormData((prev) => ({ ...prev, id: newId }));
+
+        // загружаем отложенные фото
+        for (const file of pendingExtraPhotos) {
+          const uniqueName = `${Date.now()}-${file.name}`;
+          await window.api.addPersonPhoto({
+            personId: newId,
+            tempPath: file.path,
+            fileName: uniqueName,
+          });
+        }
+        if (pendingExtraPhotos.length) {
+          const updated = await window.api.getPersonPhotos(newId);
+          setExtraPhotos(updated);
+          setPendingExtraPhotos([]);
+        }
       }
       onSave && onSave();
     } catch (err) {
@@ -240,30 +261,33 @@ export default function PersonForm({
               />
 
               {/* Дополнительные фото */}
-              {formData.id && (
-                  <>
-                    <label>Дополнительные фото:</label>
-                    <input type="file" accept="image/*" multiple onChange={handleExtraPhotosChange} />
-                    <div className="extra-photos">
-                      {extraPhotos.map((p) => (
-                          <div key={p.id} className="extra-photo-wrapper">
-                            <img
-                                src={`photos://${p.filePath}`}
-                                alt="доп фото"
-                                className="extra-photo"
-                            />
-                            <button
-                                type="button"
-                                className="delete-extra-photo"
-                                onClick={() => handleDeleteExtraPhoto(p.id)}
-                            >
-                              ✖
-                            </button>
-                          </div>
-                      ))}
-                    </div>
-                  </>
-              )}
+              <>
+                <label>Дополнительные фото:</label>
+                <input type="file" accept="image/*" multiple onChange={handleExtraPhotosChange} />
+                <div className="extra-photos">
+                  {extraPhotos.map((p) => (
+                      <div key={p.id} className="extra-photo-wrapper">
+                        <img
+                            src={`photos://${p.filePath}`}
+                            alt="доп фото"
+                            className="extra-photo"
+                        />
+                        <button
+                            type="button"
+                            className="delete-extra-photo"
+                            onClick={() => handleDeleteExtraPhoto(p.id)}
+                        >
+                          ✖
+                        </button>
+                      </div>
+                  ))}
+                  {pendingExtraPhotos.map((f, idx) => (
+                      <div key={`pending-${idx}`} className="extra-photo-wrapper">
+                        <span>{f.name} (будет добавлено после сохранения)</span>
+                      </div>
+                  ))}
+                </div>
+              </>
 
               <div className="form-buttons">
                 <button type="submit">💾 Сохранить</button>

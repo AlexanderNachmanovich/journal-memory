@@ -2,17 +2,6 @@ import React, { useState, useEffect } from "react";
 import LoginModal from "./LoginModal";
 import bg from "../assets/images/bg.png";
 
-const REGIONS = [
-  "Ангола",
-  "Афганистан",
-  "Нагорный Карабах",
-  "Сирия",
-  "Таджикистан",
-  "Чечня",
-  "Эфиопия",
-  "Зона СВО",
-];
-
 export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [clickCount, setClickCount] = useState(0);
@@ -63,22 +52,22 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
 
   return (
       <div className="map">
-        {/* ✅ фон */}
-        <img className="map-image" src={bg} alt="map" draggable={false} />
+        {/* контейнер с фиксированным соотношением 16:9 */}
+        <div className="map-container">
+          <img className="map-image" src={bg} alt="map" draggable={false} />
 
-        <div className="region-buttons">
-          {REGIONS.map((r) => (
-              <button
-                  key={r}
-                  className={`region-button ${r === "Нагорный Карабах" ? "region-karabakh" : ""}`}
-                  onClick={() => onSelect(r)}
-                  type="button"
-              >
-                {r}
-              </button>
-          ))}
+          {/* кнопки — теперь абсолютные, с top/left в % */}
+          <button className="region-button btn-angola" onClick={() => onSelect("Ангола")}>Ангола</button>
+          <button className="region-button btn-afghanistan" onClick={() => onSelect("Афганистан")}>Афганистан</button>
+          <button className="region-button btn-karabakh" onClick={() => onSelect("Нагорный Карабах")}>Нагорный Карабах</button>
+          <button className="region-button btn-syria" onClick={() => onSelect("Сирия")}>Сирия</button>
+          <button className="region-button btn-tajikistan" onClick={() => onSelect("Таджикистан")}>Таджикистан</button>
+          <button className="region-button btn-chechnya" onClick={() => onSelect("Чечня")}>Чечня</button>
+          <button className="region-button btn-ethiopia" onClick={() => onSelect("Эфиопия")}>Эфиопия</button>
+          <button className="region-button btn-svo" onClick={() => onSelect("Зона СВО")}>Зона СВО</button>
         </div>
 
+        {/* админ FAB */}
         {!isAdmin ? (
             <button
                 type="button"
@@ -123,7 +112,7 @@ export default function Map({ onSelect, isAdmin, onAdminLogin, onAdminLogout }) 
               right: 10,
               width: 60,
               height: 60,
-              opacity: 0, // невидимая зона клика
+              opacity: 0,
               zIndex: 99999,
               cursor: "pointer",
             }}
